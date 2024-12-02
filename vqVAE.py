@@ -1,6 +1,7 @@
 from torch import nn
 import torch
 from torch.nn import functional as F
+from torch.nn import CrossEntropyLoss
 
 from typing import List, Callable, Union, Any, TypeVar, Tuple
 # from torch import tensor as Tensor
@@ -67,7 +68,7 @@ class VectorQuantizer(nn.Module):
         # Add the residue back to the latents
         quantized_latents = latents + (quantized_latents - latents).detach()
 
-        return quantized_latents.permute(0, 3, 1, 2).contiguous(), vq_loss  # [B x D x H x W]
+        return quantized_latents.permute(0, 3, 1, 2).contiguous(), embedding_loss, self.beta * commitment_loss  # [B x D x H x W]
 
 
 
@@ -109,7 +110,7 @@ class VQVAE(nn.Module):
 
         modules = []
         if hidden_dims is None:
-            hidden_dims = [128, 256]
+            hidden_dims = [64, 128]
 
         # Build Encoder
         for h_dim in hidden_dims:
@@ -128,7 +129,7 @@ class VQVAE(nn.Module):
                 nn.LeakyReLU())
         )
 
-        for _ in range(6):
+        for _ in range(2):
             modules.append(ResidualLayer(in_channels, in_channels))
         modules.append(nn.LeakyReLU())
 
@@ -157,7 +158,7 @@ class VQVAE(nn.Module):
                 nn.LeakyReLU())
         )
 
-        for _ in range(6):
+        for _ in range(2):
             modules.append(ResidualLayer(hidden_dims[-1], hidden_dims[-1]))
 
         modules.append(nn.LeakyReLU())
@@ -208,8 +209,8 @@ class VQVAE(nn.Module):
 
     def forward(self, input: Tensor, **kwargs) -> List[Tensor]:
         encoding = self.encode(input)[0]
-        quantized_inputs, vq_loss = self.vq_layer(encoding)
-        return [self.decode(quantized_inputs), input, vq_loss]
+        quantized_inputs, embedding_loss, commitment_loss_beta = self.vq_layer(encoding)
+        return [self.decode(quantized_inputs), input, embedding_loss, commitment_loss_beta]
 
     def loss_function(self,
                       *args,
@@ -220,15 +221,19 @@ class VQVAE(nn.Module):
         :return:
         """
         recons = args[0]
-        input = args[1]
-        vq_loss = args[2]
+        inputs = args[1]
+        embedding_loss = args[2]
+        commitment_loss_beta = args[3]
 
-        recons_loss = F.binary_cross_entropy_with_logits(input = recons,target= input)
+        Binary_loss = nn.CrossEntropyLoss()
 
-        loss = recons_loss + vq_loss
+        recons_loss = Binary_loss(recons,inputs)
+
+        loss = recons_loss + embedding_loss + commitment_loss_beta
         return {'loss': loss,
                 'Reconstruction_Loss': recons_loss,
-                'VQ_Loss':vq_loss}
+                'CodeBook Loss':embedding_loss,
+                'Embedding Loss':commitment_loss_beta}
 
     # def sample(self,
     #            num_samples: int,

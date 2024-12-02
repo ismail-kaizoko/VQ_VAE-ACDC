@@ -102,7 +102,7 @@ def load_patient_gt(patient_PATH) :
 
 def load_dataset(Path):
     dataset = []
-    patients = os.listdir(Path)[1:]
+    patients = [patient for patient in os.listdir(Path) if os.path.isdir(os.path.join(Path, patient))]
     for patient in patients : 
         patient_gt = load_patient_gt(os.path.join(Path, patient)) 
         dataset  += patient_gt
