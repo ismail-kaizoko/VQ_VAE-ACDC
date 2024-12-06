@@ -10,11 +10,8 @@ Tensor = TypeVar('torch.tensor')
 
 
 ###### Hyper Parameters of the Model ######
-
-K =  512 # num_embeddings
-D =  64 # embedding_dim
 in_channels = 4 
-img_size = 64
+
 
 
 
@@ -207,10 +204,10 @@ class VQVAE(nn.Module):
         result = self.decoder(z)
         return result
 
-    def forward(self, input: Tensor, **kwargs) -> List[Tensor]:
-        encoding = self.encode(input)[0]
+    def forward(self, inputs: Tensor, **kwargs) -> List[Tensor]:
+        encoding = self.encode(inputs)[0]
         quantized_inputs, embedding_loss, commitment_loss_beta = self.vq_layer(encoding)
-        return [self.decode(quantized_inputs), input, embedding_loss, commitment_loss_beta]
+        return [self.decode(quantized_inputs), inputs, embedding_loss, commitment_loss_beta]
 
     def loss_function(self,
                       *args,
