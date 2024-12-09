@@ -179,7 +179,8 @@ class VQVAE(nn.Module):
                                    out_channels=4,
                                    kernel_size=4,
                                    stride=2, padding=1),
-                nn.Tanh()))
+                nn.ReLU()
+                ))
 
         self.decoder = nn.Sequential(*modules)
 
@@ -222,9 +223,7 @@ class VQVAE(nn.Module):
         embedding_loss = args[2]
         commitment_loss_beta = args[3]
 
-        Binary_loss = nn.CrossEntropyLoss()
-
-        recons_loss = Binary_loss(recons,inputs)
+        recons_loss = F.cross_entropy(recons,inputs)
 
         loss = recons_loss + embedding_loss + commitment_loss_beta
         return {'loss': loss,

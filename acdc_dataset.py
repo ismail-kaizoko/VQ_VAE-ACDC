@@ -130,7 +130,7 @@ class ACDC_Dataset(Dataset):
     
 
 class One_hot_Transform:
-    def __init__(self, num_classes):
+    def __init__(self, num_classes = 4):
         self.num_classes = num_classes
     
     def __call__(self, x):
