@@ -116,13 +116,11 @@ class VQVAE(nn.Module):
                  num_embeddings: int,
                  hidden_dims: List = None,
                  beta: float = 0.25,
-                 img_size: int = 64,
                  **kwargs) -> None:
         super(VQVAE, self).__init__()
 
         self.embedding_dim = embedding_dim
         self.num_embeddings = num_embeddings
-        self.img_size = img_size
         self.beta = beta
 
         modules = []

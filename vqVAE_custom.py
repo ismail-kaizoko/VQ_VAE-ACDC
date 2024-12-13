@@ -68,6 +68,120 @@ class VectorQuantizer(nn.Module):
 
         return quantized_latents.permute(0, 3, 1, 2).contiguous(), embedding_loss, self.beta * commitment_loss  # [B x D x H x W]
 
+    def quantized_latents_hist(self, latents: Tensor) -> Tensor:
+        latents = latents.permute(0, 2, 3, 1).contiguous()  # [B x D x H x W] -> [B x H x W x D]
+        latents_shape = latents.shape
+        flat_latents = latents.view(-1, self.D)  # [BHW x D]
+
+        # Compute L2 distance between latents and embedding weights
+        dist = torch.sum(flat_latents ** 2, dim=1, keepdim=True) + \
+               torch.sum(self.embedding.weight ** 2, dim=1) - \
+               2 * torch.matmul(flat_latents, self.embedding.weight.t())  # [BHW x K]
+
+        # Get the encoding that has the min distance
+        encoding_inds = torch.argmin(dist, dim=1).unsqueeze(1)  # [BHW, 1]
+
+
+        # Calculate the histogram of used embeddings
+        encoding_inds_flat = encoding_inds.view(-1)  # Flatten to [BHW]
+        embedding_histogram = torch.bincount(encoding_inds_flat, minlength=self.K)  # Count occurrences of each embedding
+        
+        return embedding_histogram 
+
+
+class VectorQuantizerEMA(nn.Module):
+    """
+    This is the quantizer Block inspired by the git repository : 
+    https://github.com/AntixK/PyTorch-VAE/blob/master/models/vq_vae.py
+    https://github.com/deepmind/sonnet/blob/v2/sonnet/src/nets/vqvae.py
+    """
+    def __init__(self,
+                 num_embeddings: int,
+                 embedding_dim: int,
+                 beta: float = 0.25):
+        super(VectorQuantizer, self).__init__()
+        self.K = num_embeddings
+        self.D = embedding_dim
+        self.beta = beta
+
+        self.embedding = nn.Embedding(self.K, self.D)
+        self.embedding.weight.data.uniform_(-1 / self.K, 1 / self.K)
+
+        # EMA parameters
+        self.register_buffer("cluster_size", torch.zeros(self.K))
+        self.register_buffer("ema_w", self.embedding.weight.clone())
+
+    def forward(self, latents: Tensor) -> Tensor:
+        latents = latents.permute(0, 2, 3, 1).contiguous()  # [B x D x H x W] -> [B x H x W x D]
+        latents_shape = latents.shape
+        flat_latents = latents.view(-1, self.D)  # [BHW x D]
+
+        # Compute L2 distance between latents and embedding weights
+        dist = torch.sum(flat_latents ** 2, dim=1, keepdim=True) + \
+               torch.sum(self.embedding.weight ** 2, dim=1) - \
+               2 * torch.matmul(flat_latents, self.embedding.weight.t())  # [BHW x K]
+
+        # Get the encoding that has the min distance
+        encoding_inds = torch.argmin(dist, dim=1).unsqueeze(1)  # [BHW, 1]
+
+        # Convert to one-hot encodings
+        device = latents.device
+        encoding_one_hot = torch.zeros(encoding_inds.size(0), self.K, device=device)
+        encoding_one_hot.scatter_(1, encoding_inds, 1)  # [BHW x K]
+
+        # Quantize the latents
+        quantized_latents = torch.matmul(encoding_one_hot, self.embedding.weight)  # [BHW, D]
+        quantized_latents = quantized_latents.view(latents_shape)  # [B x H x W x D]
+
+        # # Compute the VQ Losses
+        # commitment_loss = F.mse_loss(quantized_latents.detach(), latents)
+        # embedding_loss = F.mse_loss(quantized_latents, latents.detach())
+
+        # vq_loss = commitment_loss * self.beta + embedding_loss
+
+        # # Add the residue back to the latents
+        # quantized_latents = latents + (quantized_latents - latents).detach()
+
+        # return quantized_latents.permute(0, 3, 1, 2).contiguous(), embedding_loss, self.beta * commitment_loss  # [B x D x H x W]
+        # EMA update for the embedding vectors
+        if self.training:
+            ema_cluster_size = encoding_one_hot.sum(0)  # [K]
+            ema_w = torch.matmul(encoding_one_hot.t(), flat_latents)  # [K x D]
+
+            # Update cluster size and embedding weights
+            self.cluster_size.data.mul_(self.decay).add_(ema_cluster_size, alpha=1 - self.decay)
+            self.ema_w.data.mul_(self.decay).add_(ema_w, alpha=1 - self.decay)
+
+            # Normalize to avoid collapse
+            n = self.cluster_size.sum()
+            cluster_size = (self.cluster_size + self.eps) / (n + self.K * self.eps) * n
+
+            self.embedding.weight.data.copy_(self.ema_w / cluster_size.unsqueeze(1))
+
+        # Add the residue back to the latents
+        quantized_latents = latents + (quantized_latents - latents).detach()
+
+        return quantized_latents.permute(0, 3, 1, 2).contiguous(), encoding_inds  # [B x D x H x W]
+
+    def quantized_latents_hist(self, latents: Tensor) -> Tensor:
+        latents = latents.permute(0, 2, 3, 1).contiguous()  # [B x D x H x W] -> [B x H x W x D]
+        latents_shape = latents.shape
+        flat_latents = latents.view(-1, self.D)  # [BHW x D]
+
+        # Compute L2 distance between latents and embedding weights
+        dist = torch.sum(flat_latents ** 2, dim=1, keepdim=True) + \
+               torch.sum(self.embedding.weight ** 2, dim=1) - \
+               2 * torch.matmul(flat_latents, self.embedding.weight.t())  # [BHW x K]
+
+        # Get the encoding that has the min distance
+        encoding_inds = torch.argmin(dist, dim=1).unsqueeze(1)  # [BHW, 1]
+
+
+        # Calculate the histogram of used embeddings
+        encoding_inds_flat = encoding_inds.view(-1)  # Flatten to [BHW]
+        embedding_histogram = torch.bincount(encoding_inds_flat, minlength=self.K)  # Count occurrences of each embedding
+        
+        return embedding_histogram 
 
 
 
@@ -103,7 +217,7 @@ class VQVAE(nn.Module):
 
         self.embedding_dim = embedding_dim
         self.num_embeddings = num_embeddings
-        self.img_size = img_size
+
         self.beta = beta
 
         modules = []
@@ -111,11 +225,13 @@ class VQVAE(nn.Module):
         # if hidden_dims is None:
         #     hidden_dims = [64, 128]
 
-        if downsampling_factor < 1 :
+        if downsampling_factor < 2 :
             raise Warning("VQVAE can't have a donwsampling factor less than 2")
         elif downsampling_factor ==2 :
+            hidden_dims = [64]
+        elif downsampling_factor == 4 :
             hidden_dims = [64, 128]
-        elif downsampling_factor == 3 :
+        elif downsampling_factor == 8 :
             hidden_dims = [64, 128, 256]
         elif downsampling_factor > 3 :
             raise Warning("donwsizing sampling factor more than 3 is too much. ")
