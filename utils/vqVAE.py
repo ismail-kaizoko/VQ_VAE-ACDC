@@ -25,14 +25,16 @@ class VectorQuantizer(nn.Module):
     def __init__(self,
                  num_embeddings: int,
                  embedding_dim: int,
-                 beta: float = 0.25):
+                 beta: float = 0.25,
+                 embedding = None):
         super(VectorQuantizer, self).__init__()
         self.K = num_embeddings
         self.D = embedding_dim
         self.beta = beta
 
-        self.embedding = nn.Embedding(self.K, self.D)
-        self.embedding.weight.data.uniform_(-1 / self.K, 1 / self.K)
+        if ( embedding == None) : 
+            self.embedding = nn.Embedding(self.K, self.D)
+            self.embedding.weight.data.uniform_(-1 / self.K, 1 / self.K)
 
     def forward(self, latents: Tensor) -> Tensor:
         latents = latents.permute(0, 2, 3, 1).contiguous()  # [B x D x H x W] -> [B x H x W x D]
