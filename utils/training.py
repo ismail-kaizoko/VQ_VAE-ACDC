@@ -1,5 +1,7 @@
 import torch
 import matplotlib.pyplot as plt
+from torch.nn import functional as F
+import os
 
 
 
@@ -133,23 +135,23 @@ def dice_loss_hard(preds, targets, smooth=1e-6):
 
 
 
-def evaluate_model(model, val_loader):
-    model.eval()
-    val_loss = 0.0
-    with torch.no_grad():
-        for batch in val_loader:
-            inputs = batch.float().to(device)
+# def evaluate_model(model, val_loader, device):
+#     model.eval()
+#     val_loss = 0.0
+#     with torch.no_grad():
+#         for batch in val_loader:
+#             inputs = batch.float().to(device)
            
-            outputs, _, _, _ = model(inputs)
-            outputs_binary = F.softmax(outputs, dim=1)
+#             outputs, _, _, _ = model(inputs)
+#             outputs_binary = F.softmax(outputs, dim=1)
             
-            # Loss and backward
-            loss = dice_loss_hard(inputs, outputs)
+#             # Loss and backward
+#             loss = dice_loss_hard(inputs, outputs)
             
-            val_loss += loss.item()
+#             val_loss += loss.item()
     
-    avg_val_loss = val_loss / len(val_loader.dataset)
-    return avg_val_loss
+#     avg_val_loss = val_loss / len(val_loader.dataset)
+#     return avg_val_loss
 
 
 def save_model(model_name, model, epoch, train_loss_values, val_loss_values, codebook_loss_values):
@@ -164,9 +166,9 @@ def save_model(model_name, model, epoch, train_loss_values, val_loss_values, cod
                 'codebook' : model.vq_layer.embedding.weight.data }, checkpoint_path)
 
 
-def plot_train_val_loss():
+def plot_train_val_loss(train_loss_values, val_loss_values ):
     # Plot the training and validation losses
-    plt.figure(figsize=(10, 5))
+    plt.figure(figsize=(30, 15))
     plt.plot(train_loss_values, label='Train Loss')
     plt.plot(val_loss_values, label='Validation Loss')
     plt.xlabel('Iterations')
@@ -178,6 +180,20 @@ def plot_train_val_loss():
     plt.show()
 
 
-def plot_rc_loss():
-    pass
+def plot_rc_loss(train_loss_values, codebook_loss_values, beta):
+    recons_loss_values = np.array(train_loss_values) - ( (1+0.25)*np.array(codebook_loss_values))
+    # Plot the training and validation losses
+    plt.figure(figsize=(30, 15))
+    # plt.plot(train_loss_values, label='Train Loss')
+    # plt.plot(val_loss_values, label='Validation Loss')
+    plt.plot(codebook_loss_values, label = "CodeBook Loss")
+    # plt.plot(commit_loss_values, label = "Committement Loss")
+    plt.plot(recons_loss_values, label = "recons Loss")
+    plt.xlabel('Iterations')
+    plt.ylabel('Loss')
+    plt.yscale('log')
+    plt.title('Evolution of ELoss')
+    plt.legend()
+    plt.grid()
+    plt.show()
 
