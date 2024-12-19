@@ -105,7 +105,7 @@ def visualize_errors(true_seg, pred_seg, title):
 
 
 
-def dice_loss(targets, preds, smooth=1e-6, Score = True, logits = True):
+def dice_score(targets, preds, smooth=1e-6, logits = True):
     """
     Calculate Dice Loss across the 4 segmentation channels using binary masks.
     :param preds: output tensor of shape [batch_size, 4, height, width] (logits or binary)
@@ -133,12 +133,16 @@ def dice_loss(targets, preds, smooth=1e-6, Score = True, logits = True):
 
     # Calculate Dice coefficient and Dice loss
     dice_coeff = (2.0 * intersection + smooth) / (union + smooth)  # Dice coefficient per channel
-    dice_loss = 1 - dice_coeff.mean()  # Average over the batch and channels
+    dice_loss = dice_coeff.mean()  # Average over the batch and channels
 
-    if Score : 
-        return 1 - dice_loss
-    else : 
-        return dice_loss  
+    return dice_loss
+
+
+
+def dice_loss(targets, preds, smooth=1e-6, logits = True):
+    score = dice_score(targets, preds, smooth , logits)
+    return 1 - score
+
 
 
 def evaluate_model(model, val_loader, val_func, device):
@@ -174,7 +178,7 @@ def save_model(model_name, model, epoch, train_loss_values, val_loss_values, cod
 
 def plot_train_val_loss(train_loss_values, val_loss_values ):
     # Plot the training and validation losses
-    plt.figure(figsize=(30, 15))
+    plt.figure(figsize=(20, 10))
     plt.plot(train_loss_values, label='Train Loss')
     plt.plot(val_loss_values, label='Validation Loss')
     plt.xlabel('Iterations')
@@ -187,9 +191,9 @@ def plot_train_val_loss(train_loss_values, val_loss_values ):
 
 
 def plot_rc_loss(train_loss_values, codebook_loss_values, beta):
-    recons_loss_values = np.array(train_loss_values) - ( (1+0.25)*np.array(codebook_loss_values))
+    recons_loss_values = np.array(train_loss_values) - ( (1+beta)*np.array(codebook_loss_values))
     # Plot the training and validation losses
-    plt.figure(figsize=(30, 15))
+    plt.figure(figsize=(20, 10))
     # plt.plot(train_loss_values, label='Train Loss')
     # plt.plot(val_loss_values, label='Validation Loss')
     plt.plot(codebook_loss_values, label = "CodeBook Loss")

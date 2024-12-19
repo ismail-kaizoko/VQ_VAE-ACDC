@@ -118,7 +118,8 @@ class VQVAE(nn.Module):
                  in_channels: int,
                  embedding_dim: int,
                  num_embeddings: int,
-                 hidden_dims: List = None,
+                #  hidden_dims: List = None,
+                 downsampling_factor :int = 4,
                  beta: float = 0.25,
                  **kwargs) -> None:
         super(VQVAE, self).__init__()
@@ -128,8 +129,19 @@ class VQVAE(nn.Module):
         self.beta = beta
 
         modules = []
-        if hidden_dims is None:
+        
+        if downsampling_factor < 2 :
+            raise Warning("VQVAE can't have a donwsampling factor less than 2")
+        elif downsampling_factor ==2 :
+            hidden_dims = [64]
+        elif downsampling_factor == 4 :
             hidden_dims = [64, 128]
+        elif downsampling_factor == 8 :
+            hidden_dims = [64, 128, 256]
+        elif downsampling_factor > 3 :
+            raise Warning("donwsizing sampling factor more than 3 is too much. ")
+
+
 
         # Build Encoder
         for h_dim in hidden_dims:
