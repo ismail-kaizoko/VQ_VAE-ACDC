@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 from torch.nn import functional as F
 import os
 import numpy as np
+from matplotlib.colors import ListedColormap
 
 
 
@@ -47,7 +48,7 @@ def visualize_batch_logits(batch, title):
     samples = 8
 
 
-    fig, axes = plt.subplots(samples, 4, figsize=(10, 20))  # Adjust figsize to accommodate more rows
+    fig, axes = plt.subplots(samples, 4, figsize=(5, 10))  # Adjust figsize to accommodate more rows
     fig.suptitle(title, fontsize=16)
 
     for ax in axes.flat:
@@ -69,18 +70,18 @@ def visualize_batch_logits(batch, title):
 
 
 
-def visualize_errors(true_segs, pred_segs, title):
+def visualize_errors(true_seg, pred_seg, title):
     # batch_size = batch.shape[0]
     samples = 8
 
     custom_colors = [
-    '#000000', '#ff0000', '#ffd700', '#00ffff']
+    '#000000', '#ff0000', '#00ff00', '#0000ff']
     cmap = ListedColormap(custom_colors)
     # error_cmap = LinearSegmentedColormap.from_list('black_red', ['black', 'red'], N=256)
 
-    error_mask = torch.where(true_segs != pred_seg, 1, 0)
+    error_mask = torch.where(true_seg != pred_seg, 1, 0)
 
-    fig, axes = plt.subplots(samples, 3, figsize=(8, 20))  # Adjust figsize to accommodate more rows
+    fig, axes = plt.subplots(samples, 3, figsize=(10, 20))  # Adjust figsize to accommodate more rows
     fig.suptitle(title, fontsize=16)
 
 
@@ -88,7 +89,7 @@ def visualize_errors(true_segs, pred_segs, title):
         axes[i,0].imshow(true_seg[i], cmap = cmap)
         axes[i,0].axis('off')
 
-        axes[i,1].imshow(pred_segs[i], cmap = cmap)
+        axes[i,1].imshow(pred_seg[i], cmap = cmap)
         axes[i,1].axis('off')
 
         axes[i,2].imshow(error_mask[i], cmap = 'magma')
@@ -104,20 +105,23 @@ def visualize_errors(true_segs, pred_segs, title):
 
 
 
-def dice_loss_hard(preds, targets, smooth=1e-6):
+def dice_loss(targets, preds, smooth=1e-6, Score = True, logits = True):
     """
     Calculate Dice Loss across the 4 segmentation channels using binary masks.
-    :param preds: Predicted output tensor of shape [batch_size, 4, height, width] (logits or soft predictions)
+    :param preds: output tensor of shape [batch_size, 4, height, width] (logits or binary)
     :param targets: Ground truth one-hot tensor of shape [batch_size, 4, height, width]
     :param smooth: A small value to avoid division by zero
-    :return: Dice Loss (scalar)
+    :param Score : return the Dice Score if True, DiceLoss otherwise
     """
     # Apply softmax over channel dimension (4 channels) to convert logits to probabilities
-    preds = F.softmax(preds, dim=1)
+    
 
     # Convert probabilities to binary one-hot predictions by using argmax and one-hot encoding
-    preds_bin = torch.argmax(preds, dim=1)  # Shape: [batch_size, height, width] (class index for each pixel)
-    preds_onehot = F.one_hot(preds_bin, num_classes=4).permute(0, 3, 1, 2).float()  # Shape: [batch_size, 4, height, width]
+    if logits : 
+        preds = F.softmax(preds, dim=1)
+        preds_bin = torch.argmax(preds, dim=1)  # Shape: [batch_size, height, width] (class index for each pixel)
+        preds_onehot = F.one_hot(preds_bin, num_classes=4).permute(0, 3, 1, 2).float()  # Shape: [batch_size, 4, height, width]
+        preds = preds_onehot
 
     # Flatten predictions and targets for dice coefficient calculation
     preds_flat = preds_onehot.contiguous().view(preds_onehot.shape[0], preds_onehot.shape[1], -1)  # [batch_size, 4, height*width]
@@ -131,28 +135,29 @@ def dice_loss_hard(preds, targets, smooth=1e-6):
     dice_coeff = (2.0 * intersection + smooth) / (union + smooth)  # Dice coefficient per channel
     dice_loss = 1 - dice_coeff.mean()  # Average over the batch and channels
 
-    return dice_loss
+    if Score : 
+        return 1 - dice_loss
+    else : 
+        return dice_loss  
 
 
-
-
-# def evaluate_model(model, val_loader, device):
-#     model.eval()
-#     val_loss = 0.0
-#     with torch.no_grad():
-#         for batch in val_loader:
-#             inputs = batch.float().to(device)
+def evaluate_model(model, val_loader, val_func, device):
+    model.eval()
+    val_loss = []
+    with torch.no_grad():
+        for batch in val_loader:
+            inputs = batch.float().to(device)
            
-#             outputs, _, _, _ = model(inputs)
-#             outputs_binary = F.softmax(outputs, dim=1)
+            outputs, _, _, _ = model(inputs)
             
-#             # Loss and backward
-#             loss = dice_loss_hard(inputs, outputs)
+            # Loss and backward
+            loss = val_func(inputs, outputs)
             
-#             val_loss += loss.item()
-    
-#     avg_val_loss = val_loss / len(val_loader.dataset)
-#     return avg_val_loss
+            val_loss.append(loss.item() )
+
+    avg_val_loss = np.mean(np.array(val_loss))
+
+    return avg_val_loss
 
 
 def save_model(model_name, model, epoch, train_loss_values, val_loss_values, codebook_loss_values):
