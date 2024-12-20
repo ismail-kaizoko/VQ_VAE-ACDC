@@ -32,7 +32,7 @@ class VectorQuantizer(nn.Module):
         self.D = embedding_dim
         self.beta = beta
 
-        if ( embedding == None) : 
+        if ( embedding == None ) : 
             self.embedding = nn.Embedding(self.K, self.D)
             self.embedding.weight.data.uniform_(-1 / self.K, 1 / self.K)
         else : 
@@ -118,9 +118,10 @@ class VQVAE(nn.Module):
                  in_channels: int,
                  embedding_dim: int,
                  num_embeddings: int,
-                #  hidden_dims: List = None,
+                #hidden_dims: List = None,
                  downsampling_factor :int = 4,
                  beta: float = 0.25,
+                 embedding: Tensor = None,
                  **kwargs) -> None:
         super(VQVAE, self).__init__()
 
@@ -173,9 +174,10 @@ class VQVAE(nn.Module):
 
         self.encoder = nn.Sequential(*modules)
 
-        self.vq_layer = VectorQuantizer(num_embeddings,
-                                        embedding_dim,
-                                        self.beta)
+        self.vq_layer = VectorQuantizer(num_embeddings = num_embeddings,
+                                        embedding_dim = embedding_dim,
+                                        beta = self.beta,
+                                        embedding = embedding)
 
         # Build Decoder
         modules = []
