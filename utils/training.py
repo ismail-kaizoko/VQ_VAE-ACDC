@@ -178,7 +178,7 @@ def save_model(model_name, model, epoch, train_loss_values, val_loss_values, cod
 
 def plot_train_val_loss(train_loss_values, val_loss_values ):
     # Plot the training and validation losses
-    plt.figure(figsize=(20, 10))
+    plt.figure(figsize=(15, 10))
     plt.plot(train_loss_values, label='Train Loss')
     plt.plot(val_loss_values, label='Validation Loss')
     plt.xlabel('Iterations')

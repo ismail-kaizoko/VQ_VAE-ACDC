@@ -124,7 +124,7 @@ class VQVAE_MRI(nn.Module):
                  beta: float = 0.25,
                  embedding: Tensor = None,
                  **kwargs) -> None:
-        super(VQVAE, self).__init__()
+        super(VQVAE_MRI, self).__init__()
 
         self.embedding_dim = embedding_dim
         self.num_embeddings = num_embeddings
@@ -256,7 +256,7 @@ class VQVAE_MRI(nn.Module):
         modules.append(
             nn.Sequential(
                 nn.Upsample(scale_factor=2, mode='bilinear', align_corners=True),
-                nn.Conv2d(hidden_dims[-1], out_channels=4, kernel_size=3, stride=1, padding=1),
+                nn.Conv2d(hidden_dims[-1], out_channels=1, kernel_size=3, stride=1, padding=1),
                 nn.ReLU()
                 )
         )

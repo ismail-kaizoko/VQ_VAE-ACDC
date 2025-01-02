@@ -172,6 +172,39 @@ def load_dataset(Path, modality = 'SEG'):
         dataset  += patient_gt
     return dataset
 
+
+# Visulaising functions :
+
+def visualize_batch_MRI(batch):
+    """ visualize a batch if the dataset is of type MRI and not SEG 
+    works only if batch size > 16 """
+
+    batch_size = batch.shape[0]
+    if batch_size < 16 : 
+        assert('code works only if batch_size bigger than 16')
+
+    fig, axes = plt.subplots(4, 4, figsize=(10, 10))  # Adjust figsize to accommodate more rows
+    fig.suptitle('Batch elements', fontsize=20)
+
+
+    for ax in axes.flat:
+        ax.set_axis_off()
+
+    for i in range(4):
+
+        
+        axes[i,0].imshow(batch[i].squeeze(0), cmap = 'gray')
+        axes[i,1].imshow(batch[i+4].squeeze(0), cmap = 'gray')
+        axes[i,2].imshow(batch[i+8].squeeze(0), cmap = 'gray')
+        axes[i,3].imshow(batch[i+12].squeeze(0), cmap = 'gray')
+        # axes[i].axis('off')
+
+    
+    plt.tight_layout()
+    plt.show()
+
+
+
 #define the dataset
 
 class ACDC_Dataset(Dataset):
@@ -226,7 +259,7 @@ class PercentileClip:
 
     def __call__(self, image):
         # Flatten the image to compute percentiles
-        flattened_image = image.view(-1)
+        flattened_image = image.reshape(-1)
         
         # Compute the percentile values
         lower_bound = torch.quantile(flattened_image, self.lower_percentile / 100.0)
