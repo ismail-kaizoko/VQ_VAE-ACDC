@@ -23,6 +23,7 @@ This table contains the performance and parameters of various tests on the vq-va
 || Model 201            | base_model = v1.model100, epochs=100, D= 64    , K= 128    , downsample = 4     | 99.67   | 128    | 100       |
 |||||||
 |V3. : EMA updates
+|| Model 300            | epochs=100, D= 64    , K= 512    , downsample = 4 , beta = 0.25         | 99.70           |  512   | 100      |
 
 
 

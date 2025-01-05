@@ -118,7 +118,7 @@ class VQVAE(nn.Module):
                  in_channels: int,
                  embedding_dim: int,
                  num_embeddings: int,
-                #hidden_dims: List = None,
+                 #hidden_dims: List = None,
                  downsampling_factor :int = 4,
                  beta: float = 0.25,
                  embedding: Tensor = None,

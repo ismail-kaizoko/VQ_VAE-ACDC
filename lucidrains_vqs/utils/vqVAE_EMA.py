@@ -216,3 +216,11 @@ class VQVAE(nn.Module):
         """
 
         return (self.forward(x)[0] > 0.5 ) # Since we are dealing with binary image.
+
+    def codebook_usage(self, inputs):
+        encoding = self.encode(inputs)[0]
+        encoding = encoding.permute(0, 2, 3, 1)
+        _, indices, _ = self.vq_layer(encoding)
+        encoding_inds_flat = indices.view(-1)   # [B,H,W] --> [B,H,W]
+        embedding_histogram = torch.bincount(encoding_inds_flat, minlength=self.vq_layer.codebook_size)  # Count occurrences of each embedding
+        return embedding_histogram
