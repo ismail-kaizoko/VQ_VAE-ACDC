@@ -7,7 +7,9 @@ from typing import List, Callable, Union, Any, TypeVar, Tuple
 # from torch import tensor as Tensor
 Tensor = TypeVar('torch.tensor')
 
-from vector_quantize_pytorch import VectorQuantize
+# from vector_quantize_pytorch import VectorQuantize
+# from vector_quantize_pytorch import VectorQuantize
+from vector_quantize_pytorch import ResidualVQ
 
 
 ###### Hyper Parameters of the Model ######

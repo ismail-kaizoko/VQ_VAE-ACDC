@@ -200,6 +200,18 @@ def save_model(model_name, model, epoch, train_loss_values, val_loss_values, cod
                 'codebook' : model.vq_layer.codebook }, checkpoint_path)
 
 
+def save_RQ_model(model_name, model, epoch, train_loss_values, val_loss_values, codebook_loss_values):
+    checkpoint_path = os.path.join( os.getcwd() , model_name )
+    torch.save({'epoch' : epoch,
+                'K' : model.vq_layer.codebook_sizes,
+                'D' :  model.vq_layer.layers[0].dim,
+                'model_state_dict' : model.state_dict(),
+                'train_loss_values' : train_loss_values, 
+                'val_loss_values' : val_loss_values, 
+                'codebook_loss_values' : codebook_loss_values,
+                'codebook' : model.vq_layer.codebooks }, checkpoint_path)
+
+
 def plot_train_val_loss(train_loss_values, val_loss_values ):
     # Plot the training and validation losses
     plt.figure(figsize=(15, 10))
