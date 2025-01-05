@@ -1,10 +1,10 @@
 # VQ-VAE performances 
 
 This table contains the performance and parameters of various tests on the vq-vae model on various versions :
-* version 1 : raw model prosed on the original paper : 
-* version 2 : model finutuned using the Re-Fit method proposed in the article : , to increase the codeBook usage, this have shown very promissing results since we could attaind 100% usage.
-* version 3 : using ExponentialMocingAverage to update the codebook instead of the MSE loss
-* version 4 : using the RQ-VAE model (link to paper) instead of classic VQ-VAE
+* **version 1** : raw model prosed on the original paper : 
+* **version 2** : model finutuned using the Re-Fit method proposed in the article : , to increase the codeBook usage, this have shown very promissing results since we could attaind 100% usage.
+* **version 3** : using ExponentialMocingAverage to update the codebook instead of the MSE loss
+* **version 4** : using the RQ-VAE model (link to paper) instead of classic VQ-VAE
 
 
 |Model version     | Model Name       | Parameters                        | Dice Score (%) | N° Codes used | Codebook usage (%) |
@@ -27,4 +27,5 @@ This table contains the performance and parameters of various tests on the vq-va
 
 
 
-## Notes :
+## Notes : 
+...
