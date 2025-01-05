@@ -146,7 +146,7 @@ def dice_loss(targets, preds, smooth=1e-6, logits = True):
 
 
 def evaluate_model(model, val_loader, val_func, device):
-    model.eval()
+    # model.eval()
     val_loss = []
     with torch.no_grad():
         for batch in val_loader:
@@ -164,16 +164,40 @@ def evaluate_model(model, val_loader, val_func, device):
     return avg_val_loss
 
 
+def evaluate_model_with_mse(model, val_loader, device):
+    # model.eval()
+    val_loss = []
+    with torch.no_grad():
+        for batch in val_loader:
+            inputs = batch.float().to(device)
+           
+            outputs, _, _, _ = model(inputs)
+            
+            # Loss and backward
+            loss = F.mse_loss(inputs, outputs)
+            
+            val_loss.append(loss.item() )
+
+    avg_val_loss = np.mean(np.array(val_loss))
+
+    return avg_val_loss
+
+
+def evaluate_model_with_DiceScore(model, val_loader, val_func, device):
+    pass
+
+
+
 def save_model(model_name, model, epoch, train_loss_values, val_loss_values, codebook_loss_values):
     checkpoint_path = os.path.join( os.getcwd() , model_name )
     torch.save({'epoch' : epoch,
-                'K' : model.vq_layer.K,
-                'D' :  model.vq_layer.D,
+                'K' : model.vq_layer.codebook_size,
+                'D' :  model.vq_layer.dim,
                 'model_state_dict' : model.state_dict(),
                 'train_loss_values' : train_loss_values, 
                 'val_loss_values' : val_loss_values, 
                 'codebook_loss_values' : codebook_loss_values,
-                'codebook' : model.vq_layer.embedding.weight.data }, checkpoint_path)
+                'codebook' : model.vq_layer.codebook }, checkpoint_path)
 
 
 def plot_train_val_loss(train_loss_values, val_loss_values ):
