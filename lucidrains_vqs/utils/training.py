@@ -183,8 +183,41 @@ def evaluate_model_with_mse(model, val_loader, device):
     return avg_val_loss
 
 
-def evaluate_model_with_DiceScore(model, val_loader, val_func, device):
-    pass
+def evaluate_model_with_DiceScore(model, val_loader, device):
+    # model.eval()
+    val_loss = []
+    with torch.no_grad():
+        for batch in val_loader:
+            inputs = batch.float().to(device)
+           
+            outputs, _, _, _ = model(inputs)
+            
+            # Loss and backward
+            loss = dice_score(inputs, outputs)
+            
+            val_loss.append(loss.item() )
+
+    avg_val_loss = np.mean(np.array(val_loss))
+
+    return avg_val_loss
+
+def evaluate_model_with_DiceLoss(model, val_loader, device):
+    # model.eval()
+    val_loss = []
+    with torch.no_grad():
+        for batch in val_loader:
+            inputs = batch.float().to(device)
+           
+            outputs, _, _, _ = model(inputs)
+            
+            # Loss and backward
+            loss = dice_loss(inputs, outputs)
+            
+            val_loss.append(loss.item() )
+
+    avg_val_loss = np.mean(np.array(val_loss))
+
+    return avg_val_loss
 
 
 
