@@ -30,13 +30,13 @@ This table contains the performance and parameters of various tests on the vq-va
 
 ### Here are the performances of the RQ-VAE model : (paper : .link)
 
-| Model Name       | Parameters                        | Dice Score (%) | N° Codes used | Codebook usage (%) |
-|------------------|-----------------------------------|:--------------:|:-------------:|:------------------:|
-| Model 400        |D= 64    , K= 512    , downsample = 4 ,num_cb = 2, shared_cb = false,          |99.68   |  |
-| Model 401        |D= 64    , K= 512    , downsample = 8 ,num_cb = 2, shared_cb = false,          |98.70   |  |
-| Model 400        |D= 64    , K= 256    , downsample = 4 ,num_cb = 2, shared_cb = false,          |98.79   |  |
-| Model 400        |D= 64    , K= 512    , downsample = 4 ,num_cb = 2, shared_cb = True ,          |98.46   |  |
-| Model 400        |D= 64    , K= 512    , downsample = 4 ,num_cb = 4, shared_cb = false,          |90.67   |  |
+| Model Name       | Parameters                        | Dice Score (%) |
+|------------------|-----------------------------------|:--------------:|
+| Model 400        |D= 64    , K= 512    , downsample = 4 ,num_cb = 2, shared_cb = false,          |99.68   | 
+| Model 401        |D= 64    , K= 512    , downsample = 8 ,num_cb = 2, shared_cb = false,          |98.70   | 
+| Model 400        |D= 64    , K= 256    , downsample = 4 ,num_cb = 2, shared_cb = false,          |98.79   |  
+| Model 400        |D= 64    , K= 512    , downsample = 4 ,num_cb = 2, shared_cb = True ,          |98.46   |  
+| Model 400        |D= 64    , K= 512    , downsample = 4 ,num_cb = 4, shared_cb = false,          |90.67   |  
 
 
 
