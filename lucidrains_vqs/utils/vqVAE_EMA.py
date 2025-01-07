@@ -55,12 +55,13 @@ class VQVAE(nn.Module):
         self.embedding_dim = embedding_dim
         self.num_embeddings = num_embeddings
         self.beta = beta
+        self.data_mod = data_mod
 
 
-        if(data_mod not in ['SEG', 'MRI']):
+        if(self.data_mod not in ['SEG', 'MRI']):
             assert "data modalitie must be ether 'SEG' for heart segmentations or 'MRI' for mri scans"
         
-        if data_mod == 'SEG':
+        if self.data_mod == 'SEG':
             in_channels = 4  # one hot encoding input for the 4 classes
         else :
             in_channels = 1  # gray scale image
@@ -117,7 +118,7 @@ class VQVAE(nn.Module):
                                         codebook_size = num_embeddings,
                                         commitment_weight = self.beta,
                                         decay = 0.8)
-        if data_mod == 'SEG':
+        if self.data_mod == 'SEG':
             # Build Decoder
             modules = []
             modules.append(
@@ -252,7 +253,7 @@ class VQVAE(nn.Module):
         indices = args[2]
         commitment_loss_beta = args[3]
 
-        if data_mod == 'SEG':
+        if self.data_mod == 'SEG':
             recons_loss = F.cross_entropy(recons,inputs)
         else : 
             recons_loss = F.mse_loss(recons,inputs)

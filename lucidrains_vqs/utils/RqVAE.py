@@ -86,7 +86,7 @@ class RQVAE(nn.Module):
         for h_dim in hidden_dims:
             modules.append(
                 nn.Sequential(
-                    nn.Conv2d(self.in_channels, out_channels=h_dim,
+                    nn.Conv2d(64, out_channels=h_dim,
                               kernel_size=4, stride=2, padding=1),
                     nn.LeakyReLU())
             )
@@ -285,7 +285,7 @@ class RQVAE(nn.Module):
         _, indices, _ = self.vq_layer(encoding)
 
         num_codebooks = indices.shape[-1]
-        embedding_histogram = torch.zeros(num_codebooks,self.vq_layer.codebook_size )
+        embedding_histogram = torch.zeros(num_codebooks, self.vq_layer.model.vq_layer.codebook_sizes[0] )
 
         for i in range(num_codebooks):
             encoding_inds_flat_i = indices[... , i].view(-1)   # [B,H,W] --> [B,H,W]
