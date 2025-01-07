@@ -12,9 +12,6 @@ Tensor = TypeVar('torch.tensor')
 from vector_quantize_pytorch import ResidualVQ
 
 
-###### Hyper Parameters of the Model ######
-in_channels = 4 
-
 
 
 class ResidualLayer(nn.Module):
@@ -48,6 +45,7 @@ class RQVAE(nn.Module):
                  decay : float = 0.8,
                  beta: float = 0.25,
                 #  embedding: Tensor = None,
+                 data_mod = 'SEG' ,
                  **kwargs) -> None:
         super(RQVAE, self).__init__()
 
@@ -57,6 +55,17 @@ class RQVAE(nn.Module):
         self.shared_codebook = shared_codebook
         self.num_quantizers = num_quantizers
         self.decay = decay
+        self.data_mod = data_mod
+
+        if(data_mod not in ['SEG', 'MRI']):
+            assert "data modalitie must be ether 'SEG' for heart segmentations or 'MRI' for mri scans"
+        
+        if data_mod == 'SEG':
+            in_channels = 4  # one hot encoding input for the 4 classes
+        else :
+            in_channels = 1  # gray scale image
+
+        self.in_channels = in_channels
 
         modules = []
         
@@ -77,7 +86,7 @@ class RQVAE(nn.Module):
         for h_dim in hidden_dims:
             modules.append(
                 nn.Sequential(
-                    nn.Conv2d(in_channels, out_channels=h_dim,
+                    nn.Conv2d(self.in_channels, out_channels=h_dim,
                               kernel_size=4, stride=2, padding=1),
                     nn.LeakyReLU())
             )
@@ -110,45 +119,88 @@ class RQVAE(nn.Module):
                                     num_quantizers = self.num_quantizers,
                                     shared_codebook = self.shared_codebook,
                                     )
-
-        # Build Decoder
-        modules = []
-        modules.append(
-            nn.Sequential(
-                nn.Conv2d(embedding_dim,
-                          hidden_dims[-1],
-                          kernel_size=3,
-                          stride=1,
-                          padding=1),
-                nn.LeakyReLU())
-        )
-
-        for _ in range(2):
-            modules.append(ResidualLayer(hidden_dims[-1], hidden_dims[-1]))
-
-        modules.append(nn.LeakyReLU())
-
-        hidden_dims.reverse()
-
-        for i in range(len(hidden_dims) - 1):
+        
+        if data_mod == 'SEG':
+            # Build Decoder
+            modules = []
             modules.append(
                 nn.Sequential(
-                    nn.ConvTranspose2d(hidden_dims[i],
-                                       hidden_dims[i + 1],
-                                       kernel_size=4,
-                                       stride=2,
-                                       padding=1),
+                    nn.Conv2d(embedding_dim,
+                            hidden_dims[-1],
+                            kernel_size=3,
+                            stride=1,
+                            padding=1),
                     nn.LeakyReLU())
             )
 
-        modules.append(
-            nn.Sequential(
-                nn.ConvTranspose2d(hidden_dims[-1],
-                                   out_channels=4,
-                                   kernel_size=4,
-                                   stride=2, padding=1),
-                nn.ReLU()
-                ))
+            for _ in range(2):
+                modules.append(ResidualLayer(hidden_dims[-1], hidden_dims[-1]))
+
+            modules.append(nn.LeakyReLU())
+
+            hidden_dims.reverse()
+
+            for i in range(len(hidden_dims) - 1):
+                modules.append(
+                    nn.Sequential(
+                        nn.ConvTranspose2d(hidden_dims[i],
+                                        hidden_dims[i + 1],
+                                        kernel_size=4,
+                                        stride=2,
+                                        padding=1),
+                        nn.LeakyReLU())
+                )
+
+            modules.append(
+                nn.Sequential(
+                    nn.ConvTranspose2d(hidden_dims[-1],
+                                    out_channels= self.in_channels,
+                                    kernel_size=4,
+                                    stride=2, padding=1),
+                    nn.ReLU()
+                    ))
+        
+        else:
+            modules = []
+            
+            # Initial Conv layer
+            modules.append(
+                nn.Sequential(
+                    nn.Conv2d(embedding_dim,
+                            hidden_dims[-1],
+                            kernel_size=3,
+                            stride=1,
+                            padding=1),
+                    nn.LeakyReLU())
+            )
+
+            # Residual layers
+            for _ in range(2):
+                modules.append(ResidualLayer(hidden_dims[-1], hidden_dims[-1]))
+
+            modules.append(nn.LeakyReLU())
+
+            hidden_dims.reverse()
+
+            # Replace ConvTranspose2d with Interpolation + Conv2d
+            for i in range(len(hidden_dims) - 1):
+                modules.append(
+                    nn.Sequential(
+                        # Interpolation to replace upsampling via ConvTranspose2d
+                        nn.Upsample(scale_factor=2, mode='bilinear', align_corners=True),
+                        nn.Conv2d(hidden_dims[i], hidden_dims[i + 1], kernel_size=3, stride=1, padding=1),
+                        nn.LeakyReLU())
+                )
+
+            # Final upsampling and convolution layer
+            modules.append(
+                nn.Sequential(
+                    nn.Upsample(scale_factor=2, mode='bilinear', align_corners=True),
+                    nn.Conv2d(hidden_dims[-1], out_channels= self.in_channels, kernel_size=3, stride=1, padding=1),
+                    nn.ReLU()
+                    )
+            )
+
 
         self.decoder = nn.Sequential(*modules)
 
@@ -202,7 +254,12 @@ class RQVAE(nn.Module):
         indices = args[2]
         commitment_loss_beta = args[3]
 
-        recons_loss = F.cross_entropy(recons,inputs)
+
+        if data_mod == 'SEG':
+            recons_loss = F.cross_entropy(recons,inputs)
+        else : 
+            recons_loss = F.mse_loss(recons,inputs)
+
 
         loss = recons_loss + torch.sum(commitment_loss_beta) # sum over all commitement losses of all codebooks
         return {'loss': loss,

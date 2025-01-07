@@ -10,8 +10,6 @@ Tensor = TypeVar('torch.tensor')
 
 
 
-###### Hyper Parameters of the Model ######
-in_channels = 4 
 
 
 
