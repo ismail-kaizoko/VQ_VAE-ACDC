@@ -159,6 +159,7 @@ def dice_loss(targets, preds, smooth=1e-6, logits = True):
             
 #             val_loss.append(loss.item() )
 
+
 #     avg_val_loss = np.mean(np.array(val_loss))
 
 #     return avg_val_loss
@@ -166,9 +167,9 @@ def dice_loss(targets, preds, smooth=1e-6, logits = True):
 def evaluate_model(model, val_loader, device):
     data_mod = model.data_mod
 
-    if data_mod = 'SEG' :
+    if data_mod == 'SEG' :
         evaluate_model_with_DiceLoss(model, val_loader, device)
-    elif data_mod = 'MRI':
+    elif data_mod == 'MRI':
         evaluate_model_with_mse(model, val_loader, device)
     else : 
         raise Exception('wtf')
@@ -176,9 +177,9 @@ def evaluate_model(model, val_loader, device):
 def score_model(model, val_loader, device):
     data_mod = model.data_mod
 
-    if data_mod = 'SEG' :
+    if data_mod == 'SEG' :
         evaluate_model_with_DiceScore(model, val_loader, device)
-    elif data_mod = 'MRI':
+    elif data_mod == 'MRI':
         evaluate_model_with_mse(model, val_loader, device)
     else : 
         raise Exception('wtf')

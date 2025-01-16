@@ -40,17 +40,16 @@ class ResidualLayer(nn.Module):
 class VQVAE(nn.Module):
 
     def __init__(self,
-                 in_channels: int,
                  embedding_dim: int,
                  num_embeddings: int,
+                 downsampling_factor :int = 4,
+                 residual = False,
                  num_quantizers: int = 2,
                  shared_codebook: bool = False,
-                 downsampling_factor :int = 4,
                  beta: float = 0.25,
                 #  embedding: Tensor = None,
                  decay : float = 0.8,
                  data_mod = 'SEG' ,
-                 residual = False,
                  **kwargs) -> None:
         super(VQVAE, self).__init__()
 
@@ -279,7 +278,7 @@ class VQVAE(nn.Module):
 
         if self.residual :
             loss = recons_loss + torch.sum(commitment_loss_beta) # sum over all commitement losses of all codebooks
-        esle : 
+        else : 
             loss = recons_loss + commitment_loss_beta
 
 
@@ -303,7 +302,7 @@ class VQVAE(nn.Module):
         encoding = encoding.permute(0, 2, 3, 1)
         _, indices, _ = self.vq_layer(encoding)
 
-        if self.Residual :
+        if self.residual :
 
             num_codebooks = indices.shape[-1]
             embedding_histogram = torch.zeros(num_codebooks, self.vq_layer.model.vq_layer.codebook_sizes[0] )
