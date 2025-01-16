@@ -81,3 +81,63 @@ VQ_VAE =  VQVAE(embedding_dim= D,
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 model = ACDC_RQVAE.to(device)
 
+
+
+###################### training loop ######################
+
+
+model.train()
+
+train_loss_values    = []
+commit_loss_values   = []
+val_loss_values      = []
+
+
+best_val_loss = float('inf')
+
+for epoch in range(epochs):
+
+    train_loss  = []
+    commit_loss = []
+
+    with tqdm(enumerate(TrainLoader), unit="batch", total=len(TrainLoader)) as tepoch:
+        for batch_idx, (inputs) in tepoch:
+            inputs = inputs.float().to(device)  # Move data to the appropriate device (GPU/CPU)
+            
+            # Zero gradients
+            optimizer.zero_grad()
+            
+            # Forward pass // args is a list containing : [output, input, vq_loss]
+            output, inputs, indices, commitement_Loss = model(inputs)
+            
+            # Loss and backward
+            all_loss = model.loss_function(output, inputs, indices, commitement_Loss)
+            loss = all_loss['loss']  # Use the loss function defined in the model
+            recons_loss = all_loss['Reconstruction_Loss']
+            commitement_Loss = all_loss['commitement_Loss']
+
+            loss.backward()
+            optimizer.step()
+                        
+            # Track running loss
+            train_loss.append( recons_loss.item() )
+            commit_loss.append( commitement_Loss.item() )
+
+            # tqdm bar displays the loss
+            tepoch.set_postfix(loss=loss.item())
+
+    train_loss_values.append( np.mean(train_loss))
+    commit_loss_values.append( np.mean(commit_loss))
+
+    # Validation after each epoch
+    val_loss = evaluate_model(model, TestLoader, device)
+    val_loss_values.append(val_loss)
+
+
+    #saving model if Loss values decreases
+    if val_loss < best_val_loss :
+        save_model(model_name, model, epoch, train_loss_values, val_loss_values, commit_loss_values)
+        best_val_loss = val_loss
+
+print("Training complete.")
+

@@ -277,14 +277,14 @@ class VQVAE(nn.Module):
 
 
         if self.residual :
-            loss = recons_loss + torch.sum(commitment_loss_beta) # sum over all commitement losses of all codebooks
-        else : 
-            loss = recons_loss + commitment_loss_beta
+            commitment_loss_beta = torch.sum(commitment_loss_beta) # sum over all commitement losses of all codebooks
+
+        loss = recons_loss + commitment_loss_beta
 
 
         return {'loss': loss,
                 'Reconstruction_Loss': recons_loss,
-                'commitement Loss':commitment_loss_beta}
+                'commitement_Loss':commitment_loss_beta}
 
 
     def generate_from_indices(self, x: Tensor, **kwargs) -> Tensor:
@@ -294,6 +294,19 @@ class VQVAE(nn.Module):
         :return: (Tensor) [B x C x H x W]
         """ 
         pass
+
+
+
+    def reconstruct(self, x):
+        logits, _, _, _ = model(x.float())
+
+        if self.data_mod == 'SEG':
+            return F.softmax(logits, dim=1)
+        else : 
+            return logits 
+
+
+
 
 
 

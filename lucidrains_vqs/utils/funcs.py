@@ -105,6 +105,10 @@ def visualize_errors(true_seg, pred_seg, title):
 
 
 
+
+###################### loss and score function ###############################
+
+
 def dice_score(targets, preds, smooth=1e-6, logits = True):
     """
     Calculate Dice Loss across the 4 segmentation channels using binary masks.
@@ -137,40 +141,22 @@ def dice_score(targets, preds, smooth=1e-6, logits = True):
 
     return dice_loss
 
-
-
 def dice_loss(targets, preds, smooth=1e-6, logits = True):
     score = dice_score(targets, preds, smooth , logits)
     return 1 - score
 
 
 
-# def evaluate_model(model, val_loader, val_func, device):
-#     model.eval()
-#     val_loss = []
-#     with torch.no_grad():
-#         for batch in val_loader:
-#             inputs = batch.float().to(device)
-           
-#             outputs, _, _, _ = model(inputs)
-            
-#             # Loss and backward
-#             loss = val_func(inputs, outputs)
-            
-#             val_loss.append(loss.item() )
 
-
-#     avg_val_loss = np.mean(np.array(val_loss))
-
-#     return avg_val_loss
+###################### evaluation function (depending on model and data used) ##############
 
 def evaluate_model(model, val_loader, device):
     data_mod = model.data_mod
 
     if data_mod == 'SEG' :
-        evaluate_model_with_DiceLoss(model, val_loader, device)
+        return evaluate_model_with_DiceLoss(model, val_loader, device)
     elif data_mod == 'MRI':
-        evaluate_model_with_mse(model, val_loader, device)
+        return evaluate_model_with_mse(model, val_loader, device)
     else : 
         raise Exception('wtf')
 
@@ -178,9 +164,9 @@ def score_model(model, val_loader, device):
     data_mod = model.data_mod
 
     if data_mod == 'SEG' :
-        evaluate_model_with_DiceScore(model, val_loader, device)
+        return evaluate_model_with_DiceScore(model, val_loader, device)
     elif data_mod == 'MRI':
-        evaluate_model_with_mse(model, val_loader, device)
+        return evaluate_model_with_mse(model, val_loader, device)
     else : 
         raise Exception('wtf')
 
