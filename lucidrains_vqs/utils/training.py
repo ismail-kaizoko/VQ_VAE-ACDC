@@ -146,7 +146,7 @@ def dice_loss(targets, preds, smooth=1e-6, logits = True):
 
 
 def evaluate_model(model, val_loader, val_func, device):
-    # model.eval()
+    model.eval()
     val_loss = []
     with torch.no_grad():
         for batch in val_loader:
@@ -165,7 +165,7 @@ def evaluate_model(model, val_loader, val_func, device):
 
 
 def evaluate_model_with_mse(model, val_loader, device):
-    # model.eval()
+    model.eval()
     val_loss = []
     with torch.no_grad():
         for batch in val_loader:
@@ -184,7 +184,7 @@ def evaluate_model_with_mse(model, val_loader, device):
 
 
 def evaluate_model_with_DiceScore(model, val_loader, device):
-    # model.eval()
+    model.eval()
     val_loss = []
     with torch.no_grad():
         for batch in val_loader:
@@ -202,7 +202,7 @@ def evaluate_model_with_DiceScore(model, val_loader, device):
     return avg_val_loss
 
 def evaluate_model_with_DiceLoss(model, val_loader, device):
-    # model.eval()
+    model.eval()
     val_loss = []
     with torch.no_grad():
         for batch in val_loader:

@@ -10,14 +10,8 @@ Tensor = TypeVar('torch.tensor')
 from vector_quantize_pytorch import VectorQuantize
 
 
-###### Hyper Parameters of the Model ######
-in_channels = 4 
-
-
 ###################################################### Details ######################################################## 
-# this is an implementation of a Coder-Decor VQ-VAE duuitable to Vactor-Quantizer module of lucid-frains implementation
-
-
+# this is an implementation of a Coder-Decoder VQ-VAE based on a Vactor-Quantizer module of lucid-frains implementation
 
 
 class ResidualLayer(nn.Module):
@@ -49,6 +43,7 @@ class VQVAE(nn.Module):
                  beta: float = 0.25,
                 #  embedding: Tensor = None,
                  data_mod = 'SEG' ,
+                 residual = False,
                  **kwargs) -> None:
         super(VQVAE, self).__init__()
 
@@ -56,6 +51,7 @@ class VQVAE(nn.Module):
         self.num_embeddings = num_embeddings
         self.beta = beta
         self.data_mod = data_mod
+        self.residual = residual
 
 
         if(self.data_mod not in ['SEG', 'MRI']):
@@ -117,9 +113,13 @@ class VQVAE(nn.Module):
         self.vq_layer = VectorQuantize(dim = embedding_dim,
                                         codebook_size = num_embeddings,
                                         commitment_weight = self.beta,
-                                        decay = 0.8)
+                                        decay = 0.8,
+                                        accept_image_fmap = True)
+
+        # Build Decoder 
+        #  !! Decoder customizable to data modality.
+
         if self.data_mod == 'SEG':
-            # Build Decoder
             modules = []
             modules.append(
                 nn.Sequential(
@@ -211,7 +211,7 @@ class VQVAE(nn.Module):
         :return: (Tensor) List of latent codes
         """
         result = self.encoder(input)
-        return [result]
+        return result
 
     def decode(self, z: Tensor) -> Tensor:
         """
@@ -225,19 +225,9 @@ class VQVAE(nn.Module):
         return result
 
     def forward(self, inputs: Tensor, **kwargs) -> List[Tensor]:
-        encoding = self.encode(inputs)[0]
-        encoding = encoding.permute(0, 2, 3, 1)
+        encoding = self.encode(inputs)
         quantized_inputs, indices, commitment_loss_beta = self.vq_layer(encoding)
-        quantized_inputs = quantized_inputs.permute(0, 3, 1, 2)
         return [self.decode(quantized_inputs), inputs, indices, commitment_loss_beta]
-
-    ## !! update codebook_usage
-
-    # def codebook_usage(self, inputs: Tensor, **kwargs) -> List[Tensor]:
-    #     encoding = self.encode(inputs)[0]
-    #     quantized_hist = self.vq_layer.quantized_latents_hist(encoding)
-    #     return quantized_hist
-
 
 
     def loss_function(self,
@@ -263,10 +253,6 @@ class VQVAE(nn.Module):
                 'Reconstruction_Loss': recons_loss,
                 'commitement Loss':commitment_loss_beta}
 
-    # def sample(self,
-    #            num_samples: int,
-    #            current_device: Union[int, str], **kwargs) -> Tensor:
-    #     raise Warning('VQVAE sampler is not implemented.')
 
     def generate(self, x: Tensor, **kwargs) -> Tensor:
         """

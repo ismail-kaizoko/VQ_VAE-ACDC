@@ -46,7 +46,3 @@ This table contains the performance and parameters of various tests on the vq-va
 
 
 
-
-
-## Notes : 
-...

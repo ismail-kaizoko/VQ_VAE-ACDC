@@ -118,6 +118,7 @@ class RQVAE(nn.Module):
                                     decay = self.decay,
                                     num_quantizers = self.num_quantizers,
                                     shared_codebook = self.shared_codebook,
+                                    accept_image_fmap = True
                                     )
         
         if data_mod == 'SEG':
@@ -212,7 +213,7 @@ class RQVAE(nn.Module):
         :return: (Tensor) List of latent codes
         """
         result = self.encoder(input)
-        return [result]
+        return result
 
     def decode(self, z: Tensor) -> Tensor:
         """
@@ -226,10 +227,8 @@ class RQVAE(nn.Module):
         return result
 
     def forward(self, inputs: Tensor, **kwargs) -> List[Tensor]:
-        encoding = self.encode(inputs)[0]
-        encoding = encoding.permute(0, 2, 3, 1)
+        encoding = self.encode(inputs)
         quantized_inputs, indices, commitment_loss_beta = self.vq_layer(encoding)
-        quantized_inputs = quantized_inputs.permute(0, 3, 1, 2)
         return [self.decode(quantized_inputs), inputs, indices, commitment_loss_beta]
 
     ## !! update codebook_usage
