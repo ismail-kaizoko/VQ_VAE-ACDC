@@ -8,10 +8,15 @@ from typing import List, Callable, Union, Any, TypeVar, Tuple
 Tensor = TypeVar('torch.tensor')
 
 from vector_quantize_pytorch import VectorQuantize
+from vector_quantize_pytorch import ResidualVQ
+
+
 
 
 ###################################################### Details ######################################################## 
 # this is an implementation of a Coder-Decoder VQ-VAE based on a Vactor-Quantizer module of lucid-frains implementation
+
+
 
 
 class ResidualLayer(nn.Module):
@@ -38,10 +43,12 @@ class VQVAE(nn.Module):
                  in_channels: int,
                  embedding_dim: int,
                  num_embeddings: int,
-                #hidden_dims: List = None,
+                 num_quantizers: int = 2,
+                 shared_codebook: bool = False,
                  downsampling_factor :int = 4,
                  beta: float = 0.25,
                 #  embedding: Tensor = None,
+                 decay : float = 0.8,
                  data_mod = 'SEG' ,
                  residual = False,
                  **kwargs) -> None:
@@ -52,6 +59,9 @@ class VQVAE(nn.Module):
         self.beta = beta
         self.data_mod = data_mod
         self.residual = residual
+        self.shared_codebook = shared_codebook
+        self.num_quantizers = num_quantizers
+        self.decay = decay
 
 
         if(self.data_mod not in ['SEG', 'MRI']):
@@ -110,13 +120,31 @@ class VQVAE(nn.Module):
 
         self.encoder = nn.Sequential(*modules)
 
-        self.vq_layer = VectorQuantize(dim = embedding_dim,
+
+
+
+        ############## define the quantization-operator ##################
+
+        if self.residual : 
+            
+            self.vq_layer = ResidualVQ(dim = embedding_dim,
                                         codebook_size = num_embeddings,
                                         commitment_weight = self.beta,
-                                        decay = 0.8,
-                                        accept_image_fmap = True)
+                                        decay = self.decay,
+                                        num_quantizers = self.num_quantizers,
+                                        shared_codebook = self.shared_codebook,
+                                        accept_image_fmap = True
+                                        )
+        else :
+            self.vq_layer = VectorQuantize(dim = embedding_dim,
+                                            codebook_size = num_embeddings,
+                                            commitment_weight = self.beta,
+                                            decay = self.decay,
+                                            accept_image_fmap = True)
 
-        # Build Decoder 
+
+
+        ####################### Build The Decoder  #########################  
         #  !! Decoder customizable to data modality.
 
         if self.data_mod == 'SEG':
@@ -248,25 +276,45 @@ class VQVAE(nn.Module):
         else : 
             recons_loss = F.mse_loss(recons,inputs)
 
-        loss = recons_loss + commitment_loss_beta
+
+        if self.residual :
+            loss = recons_loss + torch.sum(commitment_loss_beta) # sum over all commitement losses of all codebooks
+        esle : 
+            loss = recons_loss + commitment_loss_beta
+
+
         return {'loss': loss,
                 'Reconstruction_Loss': recons_loss,
                 'commitement Loss':commitment_loss_beta}
 
 
-    def generate(self, x: Tensor, **kwargs) -> Tensor:
+    def generate_from_indices(self, x: Tensor, **kwargs) -> Tensor:
         """
         Given an input image x, returns the reconstructed image
         :param x: (Tensor) [B x C x H x W]
         :return: (Tensor) [B x C x H x W]
-        """
+        """ 
+        pass
 
-        return (self.forward(x)[0] > 0.5 ) # Since we are dealing with binary image.
+
 
     def codebook_usage(self, inputs):
         encoding = self.encode(inputs)[0]
         encoding = encoding.permute(0, 2, 3, 1)
         _, indices, _ = self.vq_layer(encoding)
-        encoding_inds_flat = indices.view(-1)   # [B,H,W] --> [B,H,W]
-        embedding_histogram = torch.bincount(encoding_inds_flat, minlength=self.vq_layer.codebook_size)  # Count occurrences of each embedding
+
+        if self.Residual :
+
+            num_codebooks = indices.shape[-1]
+            embedding_histogram = torch.zeros(num_codebooks, self.vq_layer.model.vq_layer.codebook_sizes[0] )
+
+            for i in range(num_codebooks):
+                encoding_inds_flat_i = indices[... , i].view(-1)   # [B,H,W] --> [B,H,W]
+                embedding_histogram_i = torch.bincount(encoding_inds_flat_i, minlength=self.vq_layer.codebook_size)  # Count occurrences of each embedding
+                embedding_histogram[i] = embedding_histogram_i
+        else :     
+            encoding_inds_flat = indices.view(-1)   # [B,H,W] --> [B,H,W]
+            embedding_histogram = torch.bincount(encoding_inds_flat, minlength=self.vq_layer.codebook_size)  # Count occurrences of each embedding
+        
+        
         return embedding_histogram

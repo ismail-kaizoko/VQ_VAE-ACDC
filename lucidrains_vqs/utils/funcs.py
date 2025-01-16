@@ -145,27 +145,50 @@ def dice_loss(targets, preds, smooth=1e-6, logits = True):
 
 
 
-def evaluate_model(model, val_loader, val_func, device):
-    model.eval()
-    val_loss = []
-    with torch.no_grad():
-        for batch in val_loader:
-            inputs = batch.float().to(device)
+# def evaluate_model(model, val_loader, val_func, device):
+#     model.eval()
+#     val_loss = []
+#     with torch.no_grad():
+#         for batch in val_loader:
+#             inputs = batch.float().to(device)
            
-            outputs, _, _, _ = model(inputs)
+#             outputs, _, _, _ = model(inputs)
             
-            # Loss and backward
-            loss = val_func(inputs, outputs)
+#             # Loss and backward
+#             loss = val_func(inputs, outputs)
             
-            val_loss.append(loss.item() )
+#             val_loss.append(loss.item() )
 
-    avg_val_loss = np.mean(np.array(val_loss))
+#     avg_val_loss = np.mean(np.array(val_loss))
 
-    return avg_val_loss
+#     return avg_val_loss
+
+def evaluate_model(model, val_loader, device):
+    data_mod = model.data_mod
+
+    if data_mod = 'SEG' :
+        evaluate_model_with_DiceLoss(model, val_loader, device)
+    elif data_mod = 'MRI':
+        evaluate_model_with_mse(model, val_loader, device)
+    else : 
+        raise Exception('wtf')
+
+def score_model(model, val_loader, device):
+    data_mod = model.data_mod
+
+    if data_mod = 'SEG' :
+        evaluate_model_with_DiceScore(model, val_loader, device)
+    elif data_mod = 'MRI':
+        evaluate_model_with_mse(model, val_loader, device)
+    else : 
+        raise Exception('wtf')
+
+
 
 
 def evaluate_model_with_mse(model, val_loader, device):
     model.eval()
+
     val_loss = []
     with torch.no_grad():
         for batch in val_loader:
@@ -185,6 +208,7 @@ def evaluate_model_with_mse(model, val_loader, device):
 
 def evaluate_model_with_DiceScore(model, val_loader, device):
     model.eval()
+
     val_loss = []
     with torch.no_grad():
         for batch in val_loader:
@@ -203,6 +227,7 @@ def evaluate_model_with_DiceScore(model, val_loader, device):
 
 def evaluate_model_with_DiceLoss(model, val_loader, device):
     model.eval()
+
     val_loss = []
     with torch.no_grad():
         for batch in val_loader:
@@ -222,6 +247,13 @@ def evaluate_model_with_DiceLoss(model, val_loader, device):
 
 
 def save_model(model_name, model, epoch, train_loss_values, val_loss_values, codebook_loss_values):
+    if model.residual:
+        save_RQ_model(model_name, model, epoch, train_loss_values, val_loss_values, codebook_loss_values)
+    else :
+        save_model_standard(model_name, model, epoch, train_loss_values, val_loss_values, codebook_loss_values)
+
+
+def save_model_standard(model_name, model, epoch, train_loss_values, val_loss_values, codebook_loss_values):
     checkpoint_path = os.path.join( os.getcwd() , model_name )
     torch.save({'epoch' : epoch,
                 'K' : model.vq_layer.codebook_size,
@@ -236,7 +268,7 @@ def save_model(model_name, model, epoch, train_loss_values, val_loss_values, cod
 def save_RQ_model(model_name, model, epoch, train_loss_values, val_loss_values, codebook_loss_values):
     checkpoint_path = os.path.join( os.getcwd() , model_name )
     torch.save({'epoch' : epoch,
-                'K' : model.vq_layer.codebook_sizes,
+                'K' : model.vq_layer.codebook_sizes[0],
                 'D' :  model.vq_layer.layers[0].dim,
                 'model_state_dict' : model.state_dict(),
                 'train_loss_values' : train_loss_values, 
