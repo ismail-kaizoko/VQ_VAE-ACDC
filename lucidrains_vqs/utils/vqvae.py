@@ -50,6 +50,8 @@ class VQVAE(nn.Module):
                 #  embedding: Tensor = None,
                  decay : float = 0.8,
                  data_mod = 'SEG' ,
+                 kmeans_init = False,   # set to True
+                 kmeans_iters = 10,
                  **kwargs) -> None:
         super(VQVAE, self).__init__()
 
@@ -61,6 +63,8 @@ class VQVAE(nn.Module):
         self.shared_codebook = shared_codebook
         self.num_quantizers = num_quantizers
         self.decay = decay
+        self.kmeans_init = kmeans_init
+        self.kmeans_iters = kmeans_iters
 
 
         if(self.data_mod not in ['SEG', 'MRI']):
@@ -132,14 +136,18 @@ class VQVAE(nn.Module):
                                         decay = self.decay,
                                         num_quantizers = self.num_quantizers,
                                         shared_codebook = self.shared_codebook,
-                                        accept_image_fmap = True
+                                        accept_image_fmap = True,
+                                        kmeans_init = self.kmeans_init,
+                                        kmeans_iters = self.kmeans_iters
                                         )
         else :
             self.vq_layer = VectorQuantize(dim = embedding_dim,
                                             codebook_size = num_embeddings,
                                             commitment_weight = self.beta,
                                             decay = self.decay,
-                                            accept_image_fmap = True)
+                                            accept_image_fmap = True,
+                                            kmeans_init = self.kmeans_init,
+                                            kmeans_iters = self.kmeans_iters )
 
 
 
