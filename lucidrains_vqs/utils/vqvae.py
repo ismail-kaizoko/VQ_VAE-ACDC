@@ -138,7 +138,8 @@ class VQVAE(nn.Module):
                                         shared_codebook = self.shared_codebook,
                                         accept_image_fmap = True,
                                         kmeans_init = self.kmeans_init,
-                                        kmeans_iters = self.kmeans_iters
+                                        kmeans_iters = self.kmeans_iters,
+                                        **kwargs
                                         )
         else :
             self.vq_layer = VectorQuantize(dim = embedding_dim,
@@ -147,7 +148,8 @@ class VQVAE(nn.Module):
                                             decay = self.decay,
                                             accept_image_fmap = True,
                                             kmeans_init = self.kmeans_init,
-                                            kmeans_iters = self.kmeans_iters )
+                                            kmeans_iters = self.kmeans_iters,
+                                            **kwargs )
 
 
 
@@ -304,7 +306,6 @@ class VQVAE(nn.Module):
         pass
 
 
-
     def reconstruct(self, x):
         logits, _, _, _ = model(x.float())
 
@@ -312,9 +313,6 @@ class VQVAE(nn.Module):
             return F.softmax(logits, dim=1)
         else : 
             return logits 
-
-
-
 
 
 
