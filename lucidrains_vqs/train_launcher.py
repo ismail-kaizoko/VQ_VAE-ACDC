@@ -73,7 +73,7 @@ def parse_args():
     parser.add_argument("--BATCH_SIZE", type=int, default=16, help="Batch size for training")
     parser.add_argument("--lr", type=float, default=5e-4, help="Learning rate")
     parser.add_argument("--epochs", type=int, default=100, help="Number of training epochs")
-    parser.add_argument("--model_name", type=str, default='saved_models/seg_model_300.pth', help="Path to save or load the model")
+    parser.add_argument("--model_name", type=str, default='random.pth', help="Path to save or load the model")
 
     # Model hyper-parameters
     parser.add_argument("--K", type=int, default=512, help="Number of embeddings")
@@ -86,6 +86,7 @@ def parse_args():
 
     parser.add_argument("--beta", type=float, default=0.25, help="Beta parameter")
     parser.add_argument("--decay", type=float, default=0.8, help="Decay parameter")
+    ## add loss parser , (new)
 
     parser.add_argument("--kwargs", nargs='*', help="Additional key-value pairs (e.g., --kwargs key1=value1 key2=value2)")
 
