@@ -232,6 +232,8 @@ def evaluate_model_with_DiceLoss(model, val_loader, device):
     return avg_val_loss
 
 
+######################## save funcs #########################
+
 
 def save_model(model_name, model, epoch, train_loss_values, val_loss_values, codebook_loss_values):
     if model.residual:
@@ -264,6 +266,11 @@ def save_RQ_model(model_name, model, epoch, train_loss_values, val_loss_values, 
                 'codebook' : model.vq_layer.codebooks }, checkpoint_path)
 
 
+
+
+
+###################### plot funcs ########################
+
 def plot_train_val_loss(train_loss_values, val_loss_values ):
     # Plot the training and validation losses
     plt.figure(figsize=(15, 10))
@@ -294,4 +301,73 @@ def plot_rc_loss(train_loss_values, codebook_loss_values, beta):
     plt.legend()
     plt.grid()
     plt.show()
+
+
+
+###########################   Printing Functions #################
+
+def print_arguments(args, defaults):
+    """
+    Print all arguments with their values and indicate if they were set by the user or by default.
+    """
+    print("\nModel Arguments:")
+    for arg in vars(args):
+        value = getattr(args, arg)
+        if arg in defaults:
+            default_value = defaults[arg]
+            if value == default_value:
+                print(f"{arg}: {value} (default)")
+            else:
+                print(f"{arg}: {value} (set by user)")
+        else:
+            # For arguments without explicit defaults (e.g., flags like --use_residual)
+            if isinstance(value, bool):
+                if value:
+                    print(f"{arg}: {value} (set by user)")
+            else:
+                print(f"{arg}: {value}")
+
+
+
+####################### codebook funcs #######################
+
+def codebook_hist_testset(model, val_loader, device):
+    model.eval() 
+    
+    if model.residual:
+        num_codebooks = len(model.vq_layer.codebook_sizes)
+        size_codebook = model.vq_layer.codebook_sizes[0]
+        hist = torch.zeros(num_codebooks,size_codebook ).to(device)
+
+        for i in range(num_codebooks):
+        
+            with torch.no_grad():
+                for batch in val_loader:
+                    hist += model.codebook_usage(batch.float().to(device)).to(device)
+        
+        hist = hist.detach().cpu().numpy()
+        
+        for i, hist_i in enumerate(hist):
+            unused_codes = len(np.where(hist_i == 0.0)[0])
+            
+            
+            percentage = (size_codebook - unused_codes) * 100 / size_codebook
+            print(f"Codebook {i+1}: ONLY {size_codebook - unused_codes} OF CODES WERE USED FROM {size_codebook}, WHICH MAKES {percentage:.2f}% OF CODES FROM THE CODEBOOK")
+
+    else : 
+
+        hist = torch.zeros(model.vq_layer.codebook_size).to(device)
+        with torch.no_grad():
+            for batch in val_loader:
+                hist += model.codebook_usage(batch.float().to(device))
+        
+        hist = hist.detach().cpu().numpy()
+        unused_codes = len(np.where(hist == 0.0)[0])
+
+        percentage = (model.vq_layer.codebook_size - unused_codes)*100/model.vq_layer.codebook_size
+
+        print(f" ONLY {model.vq_layer.codebook_size - unused_codes} OF CODES WERE USED FROM {model.vq_layer.codebook_size}, WHICH MAKE {percentage} % OF CODES FROM THE CODE-BOOK")
+        
+    return hist
+
 

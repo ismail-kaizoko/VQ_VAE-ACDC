@@ -184,17 +184,48 @@ print("Training complete.")
 
 
 
-################ Evaluae the mode #################
+################ Evaluae the model #################
 
-print("The model score : " , score_model(model, TestLoader, device))
+if (args.data_modality == 'SEG'):
+    dataset = "Segmentations dataset"
+    score = " The DiceScore "
+else : 
+    dataset = "MRI images dataset"
+    score = " The MSE score "
+
+
+print(" -------------------------------------------------------------")
+print("\n This model is trained on the {}".format(dataset))
+
+
+
+print("The model score is : " , score_model(model, TestLoader, device))
 
 
 ################ CodeBook usage ###################
 
 
+hist = codebook_hist_testset(model, TestLoader, device)
+hist = hist/np.sum(hist)
 
+
+
+
+
+
+
+# if __name__ == "__main__":
+#     args = parse_args()
+#     print(args)
 
 
 if __name__ == "__main__":
+    # Parse arguments and store default values
+    parser = argparse.ArgumentParser()
+    defaults = vars(parse_args())  # Store default argument values
+
+    # Re-parse after user-provided arguments
     args = parse_args()
-    print(args)
+    
+    # Print arguments with the information of whether they are defaults or user-set
+    print_arguments(args, defaults)

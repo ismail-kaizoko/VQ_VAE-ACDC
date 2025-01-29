@@ -52,6 +52,8 @@ class VQVAE(nn.Module):
                  data_mod = 'SEG' ,
                  kmeans_init = False,   # set to True
                  kmeans_iters = 10,
+                 in_channels = None, 
+                 loss_func = None,
                  **kwargs) -> None:
         super(VQVAE, self).__init__()
 
@@ -70,12 +72,40 @@ class VQVAE(nn.Module):
         if(self.data_mod not in ['SEG', 'MRI']):
             assert "data modalitie must be ether 'SEG' for heart segmentations or 'MRI' for mri scans"
         
-        if self.data_mod == 'SEG':
-            in_channels = 4  # one hot encoding input for the 4 classes
-        else :
-            in_channels = 1  # gray scale image
+        # set in_channels
+        if (in_channels == None):
+            #if None adapt to dataset type
+            if self.data_mod == 'SEG':
+                in_channels = 4  # one hot encoding input for the 4 classes
+            else :
+                in_channels = 1  # gray scale image
 
         self.in_channels = in_channels
+
+
+        # set loss_function
+
+        self.loss_functions = {
+            'MSE' : F.mse_loss,
+            'L1'  : F.l1_loss,
+            'CrossEntropy' : F.cross_entropy
+        }
+
+        if (loss_func == None):
+            #if None, adapt to dataset type (regression Vs Classification)
+            if self.data_mod == 'SEG':
+                self.loss_func = F.cross_entropy  # one hot encoding input for the 4 classes
+            else :
+                self.loss_func = F.mse_loss   # gray scale image
+
+        else : 
+            if loss_func not in self.loss_functions:
+                raise ValueError(f"Unsupported loss function: {loss}. Supported losses are: {list(self.loss_functions.keys())}")
+            else : 
+                self.loss_func = self.loss_functions[loss_func]
+        
+    
+
 
 
         modules = []
@@ -280,10 +310,12 @@ class VQVAE(nn.Module):
         indices = args[2]
         commitment_loss_beta = args[3]
 
-        if self.data_mod == 'SEG':
-            recons_loss = F.cross_entropy(recons,inputs)
-        else : 
-            recons_loss = F.mse_loss(recons,inputs)
+        # if self.data_mod == 'SEG':
+        #     recons_loss = F.cross_entropy(recons,inputs)
+        # else : 
+        #     recons_loss = F.mse_loss(recons,inputs)
+
+        recons_loss = self.loss_func(recons,inputs)
 
 
         if self.residual :
@@ -295,6 +327,7 @@ class VQVAE(nn.Module):
         return {'loss': loss,
                 'Reconstruction_Loss': recons_loss,
                 'commitement_Loss':commitment_loss_beta}
+
 
 
     def generate_from_indices(self, x: Tensor, **kwargs) -> Tensor:
@@ -317,14 +350,13 @@ class VQVAE(nn.Module):
 
 
     def codebook_usage(self, inputs):
-        encoding = self.encode(inputs)[0]
-        encoding = encoding.permute(0, 2, 3, 1)
+        encoding = self.encode(inputs)
         _, indices, _ = self.vq_layer(encoding)
 
         if self.residual :
 
             num_codebooks = indices.shape[-1]
-            embedding_histogram = torch.zeros(num_codebooks, self.vq_layer.model.vq_layer.codebook_sizes[0] )
+            embedding_histogram = torch.zeros(num_codebooks, self.vq_layer.codebook_sizes[0] )
 
             for i in range(num_codebooks):
                 encoding_inds_flat_i = indices[... , i].view(-1)   # [B,H,W] --> [B,H,W]
@@ -336,3 +368,5 @@ class VQVAE(nn.Module):
         
         
         return embedding_histogram
+
+

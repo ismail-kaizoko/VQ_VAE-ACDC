@@ -12,7 +12,8 @@
 # source /home/ids/ihamdaoui-21/anaconda3/etc/profile.d/conda.h
 # conda activate torch
 
-module load conda
+# module load conda
+source /home/ids/ihamdaoui-21/anaconda3/etc/profile.d/conda.sh
 conda activate torch
 
 
