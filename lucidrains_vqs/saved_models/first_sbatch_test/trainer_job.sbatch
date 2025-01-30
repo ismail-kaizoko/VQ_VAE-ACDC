@@ -2,8 +2,8 @@
 #SBATCH --job-name=test
 #SBATCH --partition=P100            # Use the GPU partition
 #SBATCH --time=01:00:00            # Time limit
-#SBATCH --output=logs/%x_%j.out    # Stdout logs
-#SBATCH --error=logs/%x_%j.err     # Stderr logs
+#SBATCH --output=logs/%x.out    # Stdout logs
+#SBATCH --error=logs/%x.err     # Stderr logs
 
 
 
@@ -16,4 +16,4 @@ conda activate torch
 
 
 # Run the training script with specific arguments
-srun python /home/ids/ihamdaoui-21/vq_vae_project/VQ_VAE-ACDC/lucidrains_vqs/train_launcher.py --epochs 5
+srun python /home/ids/ihamdaoui-21/vq_vae_project/VQ_VAE-ACDC/lucidrains_vqs/train_launcher.py --epochs 2

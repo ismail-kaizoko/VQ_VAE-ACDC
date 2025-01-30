@@ -59,6 +59,36 @@ import argparse
 # beta = .25
 # decay = .8
 
+def print_arguments(args, parser):
+    """
+    Prints all arguments used in the script and highlights whether default values were used.
+    
+    Args:
+        args: The parsed arguments (from `parser.parse_args()`).
+        parser: The `argparse.ArgumentParser` object.
+    """
+    print("Arguments used in the script:")
+    print("-" * 50)
+    
+    # Get the default values from the parser
+    defaults = {action.dest: action.default for action in parser._actions if action.dest != "help"}
+    
+    # Iterate through the arguments and print their values
+    for arg_name, arg_value in vars(args).items():
+        if arg_name in defaults:
+            default_value = defaults[arg_name]
+            if arg_value == default_value:
+                # Highlight if the default value was used
+                print(f"{arg_name}: {arg_value} (default)")
+            else:
+                # Highlight if the user provided a value
+                print(f"{arg_name}: {arg_value} (user-provided)")
+        else:
+            # Handle cases where the argument doesn't have a default (e.g., --kwargs)
+            print(f"{arg_name}: {arg_value}")
+
+    print("-" * 50)
+
 
 def train(): 
     ######################    Parse command-line ################################.
@@ -67,27 +97,27 @@ def train():
 
     # Dataset parameters
     parser.add_argument("--L", type=int, default=128, help="Length of input images")
-    parser.add_argument("--data_modality", type=str, choices=['SEG', 'MRI'], default='SEG', help="Data modality: 'SEG' for segmentation dataset, 'MRI' for gray-scale MRIs")
+    parser.add_argument("--data_modality", type=str, choices=['SEG', 'MRI'], required = True, help="Data modality: 'SEG' for segmentation dataset, 'MRI' for gray-scale MRIs")
 
     # Training parameters
     parser.add_argument("--BATCH_SIZE", type=int, default=16, help="Batch size for training")
     parser.add_argument("--lr", type=float, default=5e-4, help="Learning rate")
     parser.add_argument("--epochs", type=int, default=100, help="Number of training epochs")
-    parser.add_argument("--model_name", type=str, default='random.pth', help="Path to save or load the model")
+    parser.add_argument("--model_name", type=str, required = True, help="Path to save or load the model")
+    parser.add_argument("--loss_func",type= str, default=None, help="Loss function to use")
+
 
     # Model hyper-parameters
     parser.add_argument("--K", type=int, default=512, help="Number of embeddings")
     parser.add_argument("--D", type=int, default=64, help="Embedding dimension")
     parser.add_argument("--downsampling_factor", type=int, default=8, help="Downsampling factor")
 
-    parser.add_argument("--use_residual", action='store_true', help="Use RQ-VAE if set")
+    parser.add_argument("--use_residual", action='store_false', help="Use RQ-VAE if set to true")
     parser.add_argument("--num_quantizers", type=int, default=2, help="Number of quantizers")
-    parser.add_argument("--shared_codebook", action='store_true', help="Use shared codebook if set")
+    parser.add_argument("--shared_codebook", action='store_false', help="Use shared codebook if set")
 
     parser.add_argument("--beta", type=float, default=0.25, help="Beta parameter")
     parser.add_argument("--decay", type=float, default=0.8, help="Decay parameter")
-    ## add loss parser , (new)
-
     # **kwargd arguments
     parser.add_argument("--kwargs", nargs='*', help="Additional key-value pairs (e.g., --kwargs key1=value1 key2=value2)")
 
@@ -95,7 +125,8 @@ def train():
 
 
 
-
+    # Print arguments with default highlighting
+    print_arguments(args, parser)
 
 
 
@@ -208,7 +239,7 @@ def train():
 
         #saving model if Loss values decreases
         if val_loss < best_val_loss :
-            save_model(model_name, model, epoch, train_loss_values, val_loss_values, commit_loss_values)
+            save_model(args.model_name, model, epoch, train_loss_values, val_loss_values, commit_loss_values)
             best_val_loss = val_loss
 
         print('Epoch {}: '.format(epoch))
