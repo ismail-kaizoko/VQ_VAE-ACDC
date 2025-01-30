@@ -1,0 +1,7 @@
+Traceback (most recent call last):
+  File "/home/ids/ihamdaoui-21/vq_vae_project/VQ_VAE-ACDC/lucidrains_vqs/train_launcher.py", line 258, in <module>
+    train()
+  File "/home/ids/ihamdaoui-21/vq_vae_project/VQ_VAE-ACDC/lucidrains_vqs/train_launcher.py", line 152, in train
+    optimizer = optim.AdamW(model.parameters(), lr=lr, weight_decay=1e-4)
+NameError: name 'lr' is not defined
+srun: error: node17: task 0: Exited with exit code 1
