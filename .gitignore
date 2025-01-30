@@ -15,4 +15,6 @@ env/
 # Environment variables
 .env
 
-test.ipynb
+#ignore the folder garbage
+garbage/
+lucidrains_vqs/test.ipynb
