@@ -1,5 +1,0 @@
-Traceback (most recent call last):
-  File "/home/ids/ihamdaoui-21/vq_vae_project/VQ_VAE-ACDC/lucidrains_vqs/train_launcher.py", line 109, in <module>
-    VQ_VAE =  VQVAE(embedding_dim= args.D,
-NameError: name 'args' is not defined
-srun: error: node20: task 0: Exited with exit code 1

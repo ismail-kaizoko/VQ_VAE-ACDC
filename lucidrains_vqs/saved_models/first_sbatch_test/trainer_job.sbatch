@@ -16,4 +16,4 @@ conda activate torch
 
 
 # Run the training script with specific arguments
-srun python /home/ids/ihamdaoui-21/vq_vae_project/VQ_VAE-ACDC/lucidrains_vqs/train_launcher.py
+srun python /home/ids/ihamdaoui-21/vq_vae_project/VQ_VAE-ACDC/lucidrains_vqs/train_launcher.py --epochs 5
