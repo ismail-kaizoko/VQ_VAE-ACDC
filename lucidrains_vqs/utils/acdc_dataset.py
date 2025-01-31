@@ -6,6 +6,8 @@ import torchvision.transforms.functional as F
 import torch.nn.functional as f
 from torch.utils.data import Dataset
 
+from matplotlib import pyplot as plt
+
 import os
 import numpy as np
 
@@ -175,7 +177,7 @@ def load_dataset(Path, modality = 'SEG'):
 
 # Visulaising functions :
 
-def visualize_batch_MRI(batch):
+def visualize_batch_MRI(batch, title):
     """ visualize a batch if the dataset is of type MRI and not SEG 
     works only if batch size > 16 """
 
@@ -199,7 +201,7 @@ def visualize_batch_MRI(batch):
         axes[i,3].imshow(batch[i+12].squeeze(0), cmap = 'gray')
         # axes[i].axis('off')
 
-    
+    plt.title(title)
     plt.tight_layout()
     plt.show()
 

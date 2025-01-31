@@ -106,15 +106,15 @@ def train():
     parser.add_argument("--model_name", type=str, required = True, help="Path to save or load the model")
     parser.add_argument("--loss_func",type= str, default=None, help="Loss function to use")
 
-
+    
     # Model hyper-parameters
     parser.add_argument("--K", type=int, default=512, help="Number of embeddings")
     parser.add_argument("--D", type=int, default=64, help="Embedding dimension")
     parser.add_argument("--downsampling_factor", type=int, default=8, help="Downsampling factor")
 
-    parser.add_argument("--use_residual", action='store_false', help="Use RQ-VAE if set to true")
+    parser.add_argument("--use_residual", action='store_true', help="Use RQ-VAE if set to true")
     parser.add_argument("--num_quantizers", type=int, default=2, help="Number of quantizers")
-    parser.add_argument("--shared_codebook", action='store_false', help="Use shared codebook if set")
+    parser.add_argument("--shared_codebook", action='store_true', help="Use shared codebook if set")
 
     parser.add_argument("--beta", type=float, default=0.25, help="Beta parameter")
     parser.add_argument("--decay", type=float, default=0.8, help="Decay parameter")
@@ -239,13 +239,14 @@ def train():
 
         #saving model if Loss values decreases
         if val_loss < best_val_loss :
-            save_model(args.model_name, model, epoch, train_loss_values, val_loss_values, commit_loss_values)
+            save_model(args.model_name, model, epoch, train_loss_values, val_loss_values, commit_loss_values, val_loss)
             best_val_loss = val_loss
 
-        print('Epoch {}: '.format(epoch))
 
-
+    print("\n\n\n\n")
     print("Training complete.")
+    print("\n\n\n\n")
+
 
 
 
@@ -259,21 +260,32 @@ def train():
         score = " The MSE score "
 
 
-    print(" -------------------------------------------------------------")
-    print("\n This model is trained on the {}".format(dataset))
+    print("-" * 50)
+    print("\n\n\n\n")
+
+    print("This model is trained on the {}".format(dataset))
 
 
 
     print("The model score is : " , score_model(model, TestLoader, device))
+    print("\n\n\n\n")
+    print("-" * 50)
+
 
 
     ################ CodeBook usage ###################
 
-    print("\n\n\n -------------------------------------------------------")
+    print("\n\n\n\n")
+
     print("codebook_investigation : ")
+
+
     hist = codebook_hist_testset(model, TestLoader, device)
     hist = hist/np.sum(hist)
-    print(hist)
+    # print(hist)
+    print("\n\n\n\n")
+
+    
 
 
 

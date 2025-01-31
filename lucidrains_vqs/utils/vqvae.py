@@ -88,6 +88,7 @@ class VQVAE(nn.Module):
         self.loss_functions = {
             'MSE' : F.mse_loss,
             'L1'  : F.l1_loss,
+            'smoothL1' : torch.nn.SmoothL1Loss(),
             'CrossEntropy' : F.cross_entropy
         }
 

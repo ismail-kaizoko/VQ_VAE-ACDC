@@ -1,5 +1,7 @@
 import torch
 import matplotlib.pyplot as plt
+from matplotlib import pyplot as plt
+
 from torch.nn import functional as F
 import os
 import numpy as np
@@ -235,31 +237,33 @@ def evaluate_model_with_DiceLoss(model, val_loader, device):
 ######################## save funcs #########################
 
 
-def save_model(model_name, model, epoch, train_loss_values, val_loss_values, codebook_loss_values):
+def save_model(model_name, model, epoch, train_loss_values, val_loss_values, codebook_loss_values, score):
     if model.residual:
-        save_RQ_model(model_name, model, epoch, train_loss_values, val_loss_values, codebook_loss_values)
+        save_RQ_model(model_name, model, epoch, train_loss_values, val_loss_values, codebook_loss_values, score)
     else :
-        save_model_standard(model_name, model, epoch, train_loss_values, val_loss_values, codebook_loss_values)
+        save_model_standard(model_name, model, epoch, train_loss_values, val_loss_values, codebook_loss_values, score)
 
 
-def save_model_standard(model_name, model, epoch, train_loss_values, val_loss_values, codebook_loss_values):
+def save_model_standard(model_name, model, epoch, train_loss_values, val_loss_values, codebook_loss_values, score):
     checkpoint_path = os.path.join( os.getcwd() , model_name )
     torch.save({'epoch' : epoch,
                 'K' : model.vq_layer.codebook_size,
                 'D' :  model.vq_layer.dim,
                 'model_state_dict' : model.state_dict(),
+                'score' : score,
                 'train_loss_values' : train_loss_values, 
                 'val_loss_values' : val_loss_values, 
                 'codebook_loss_values' : codebook_loss_values,
                 'codebook' : model.vq_layer.codebook }, checkpoint_path)
 
 
-def save_RQ_model(model_name, model, epoch, train_loss_values, val_loss_values, codebook_loss_values):
+def save_RQ_model(model_name, model, epoch, train_loss_values, val_loss_values, codebook_loss_values, score):
     checkpoint_path = os.path.join( os.getcwd() , model_name )
     torch.save({'epoch' : epoch,
                 'K' : model.vq_layer.codebook_sizes[0],
                 'D' :  model.vq_layer.layers[0].dim,
                 'model_state_dict' : model.state_dict(),
+                'score' : score,
                 'train_loss_values' : train_loss_values, 
                 'val_loss_values' : val_loss_values, 
                 'codebook_loss_values' : codebook_loss_values,

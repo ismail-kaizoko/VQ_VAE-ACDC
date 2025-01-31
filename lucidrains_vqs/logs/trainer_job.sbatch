@@ -1,5 +1,6 @@
 #!/usr/bin/bash
-#SBATCH --job-name=test
+#SBATCH --job-name=128_64_8_std
+#SBATCH --gres=gpu  # Request 1 GPU
 #SBATCH --partition=P100            # Use the GPU partition
 #SBATCH --time=01:00:00            # Time limit
 #SBATCH --output=logs/%x.out    # Stdout logs
@@ -16,4 +17,12 @@ conda activate torch
 
 
 # Run the training script with specific arguments
-srun python /home/ids/ihamdaoui-21/vq_vae_project/VQ_VAE-ACDC/lucidrains_vqs/train_launcher.py --epochs 2
+srun python /home/ids/ihamdaoui-21/vq_vae_project/VQ_VAE-ACDC/lucidrains_vqs/train_launcher.py \
+    --K 128\
+    --D 64\
+    --downsampling_factor 8\
+    --epochs 100\
+    --model_name saved_models/seg/128_64_8_std.pth\
+    --data_modality 'SEG'\
+
+
