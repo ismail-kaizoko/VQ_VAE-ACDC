@@ -186,7 +186,7 @@ def visualize_batch_MRI(batch, title):
         assert('code works only if batch_size bigger than 16')
 
     fig, axes = plt.subplots(4, 4, figsize=(10, 10))  # Adjust figsize to accommodate more rows
-    fig.suptitle('Batch elements', fontsize=20)
+    fig.suptitle(title, fontsize=20)
 
 
     for ax in axes.flat:
