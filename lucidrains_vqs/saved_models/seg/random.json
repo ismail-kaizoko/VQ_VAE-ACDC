@@ -7,13 +7,14 @@
     "num_quantizers": 2,
     "shared_codebook": false,
     "beta": 0.25,
-    "decay": 0.8,
-    "data_mod": "SEG"
+    "decay": 0.8
   },
   "kwargs_arguments": {
     "kmeans_init": "True"
   },
   "training_parameters": {
+    "data_mod": "SEG",
+    "L": 128,
     "batch_size": 16,
     "epochs": 2,
     "loss_function": null

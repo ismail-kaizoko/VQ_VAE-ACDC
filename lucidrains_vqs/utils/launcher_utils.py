@@ -1,3 +1,7 @@
+from datetime import datetime
+import json
+
+
 
 def print_arguments(args, parser):
     """
@@ -66,14 +70,13 @@ def save_training_metadata(args, best_epoch, score, percentage):
             "shared_codebook": args.shared_codebook,
             "beta": args.beta,
             "decay": args.decay,
-            "data_mod": args.data_modality,
-        },
-        "kwargs_arguments": kwargs_dict,  # Store additional kwargs arguments
-        "training_parameters": {
-            "batch_size": args.BATCH_SIZE,
+            "data_mod": args.data_mod,
+            "L": args.L,
+            "batch_size": args.batch_size,
             "epochs":args.epochs,
             "loss_function": args.loss_func,
         },
+        "kwargs_arguments": kwargs_dict,  # Store additional kwargs arguments
         "evaluation": {
             "best_epoch" : best_epoch, 
             "score" : score,

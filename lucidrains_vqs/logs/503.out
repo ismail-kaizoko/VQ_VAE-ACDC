@@ -1,0 +1,20 @@
+Arguments used in this script:
+
+
+L: 128 (default)
+data_mod: SEG (user-provided)
+batch_size: 16 (default)
+lr: 0.0005 (default)
+epochs: 100 (default)
+model_name: saved_models/seg_kwargs/503.pth (user-provided)
+loss_func: None (default)
+K: 512 (default)
+D: 64 (default)
+downsampling_factor: 8 (default)
+use_residual: False (default)
+num_quantizers: 2 (default)
+shared_codebook: False (default)
+beta: 0.25 (default)
+decay: 0.8 (default)
+kwargs: ['threshold_ema_dead_code=2'] (user-provided)
+--------------------------------------------------

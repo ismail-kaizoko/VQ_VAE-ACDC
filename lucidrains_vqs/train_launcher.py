@@ -29,7 +29,6 @@ from utils.launcher_utils import *
 
 import argparse
 import json
-from datetime import datetime
 
 
 
@@ -46,10 +45,10 @@ def train():
 
     # Dataset parameters
     parser.add_argument("--L", type=int, default=128, help="Length of input images")
-    parser.add_argument("--data_modality", type=str, choices=['SEG', 'MRI'], required = True, help="Data modality: 'SEG' for segmentation dataset, 'MRI' for gray-scale MRIs")
+    parser.add_argument("--data_mod", type=str, choices=['SEG', 'MRI'], required = True, help="Data modality: 'SEG' for segmentation dataset, 'MRI' for gray-scale MRIs")
 
     # Training parameters
-    parser.add_argument("--BATCH_SIZE", type=int, default=16, help="Batch size for training")
+    parser.add_argument("--batch_size", type=int, default=16, help="Batch size for training")
     parser.add_argument("--lr", type=float, default=5e-4, help="Learning rate")
     parser.add_argument("--epochs", type=int, default=100, help="Number of training epochs")
     parser.add_argument("--model_name", type=str, required = True, help="Path to save or load the model")
@@ -91,11 +90,11 @@ def train():
     test_set_path  = os.path.join(dataset_path, "testing")
 
 
-    train_dataset = load_dataset(train_set_path, modality= args.data_modality)
-    test_dataset  = load_dataset(test_set_path, modality= args.data_modality)
+    train_dataset = load_dataset(train_set_path, modality= args.data_mod)
+    test_dataset  = load_dataset(test_set_path, modality= args.data_mod)
 
 
-    if args.data_modality == 'SEG':
+    if args.data_mod == 'SEG':
         input_transforms = Compose([
             transforms.Resize(size=(args.L,args.L), interpolation=transforms.InterpolationMode.NEAREST),
             One_hot_Transform(num_classes=4)
@@ -111,8 +110,8 @@ def train():
     TrainDataset = ACDC_Dataset(data = train_dataset, transforms= input_transforms) 
     TestDataset  = ACDC_Dataset(data = test_dataset, transforms= input_transforms)
 
-    TrainLoader  = DataLoader(TrainDataset, batch_size = args.BATCH_SIZE, shuffle = True)
-    TestLoader   = DataLoader(TestDataset , batch_size = args.BATCH_SIZE, shuffle = False)
+    TrainLoader  = DataLoader(TrainDataset, batch_size = args.batch_size, shuffle = True)
+    TestLoader   = DataLoader(TestDataset , batch_size = args.batch_size, shuffle = False)
 
 
 
@@ -127,7 +126,7 @@ def train():
                     shared_codebook = args.shared_codebook,
                     beta = args.beta,
                     decay = args.decay,
-                    data_mod = args.data_modality
+                    data_mod = args.data_mod
                         )
 
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -207,7 +206,7 @@ def train():
 
 
 
-    if (args.data_modality == 'SEG'):
+    if (args.data_mod == 'SEG'):
         dataset = "Segmentations dataset"
         type_score = " % in The DiceScore "
     else : 
