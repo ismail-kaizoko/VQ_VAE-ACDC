@@ -1,5 +1,7 @@
+############################################################################
+#######################  import necessary libraries  #######################
+############################################################################
 
-########## import necessary libraries ################
 
 import numpy as np
 import torch 
@@ -25,39 +27,16 @@ from utils.funcs import *
 from utils.vqvae import *
 
 import argparse
+import json
+from datetime import datetime
 
 
 
 
-
+############################################################################
 ######################## Parameters ######################
+############################################################################
 
-
-
-
-# # dataset params :
-# L = 128  # length of input images
-# data_modality = 'SEG'  # either 'SEG' to use segmentation dataset or 'MRI' for gray-scale MRIs
-
-
-# # training params
-# BATCH_SIZE = 16
-# lr = 5e-4
-# epochs = 100
-# model_name = 'saved_models/seg_model_300.pth'
-
-
-# # model hyper-params :
-# K =  512 # num_embeddings
-# D =  64  # embedding_dim 
-# downsampling_factor = 8
-
-# use_residual = False # swicth to True if wants to use RQ-VAE
-# num_quantizers = 2
-# shared_codebook = False
-
-# beta = .25
-# decay = .8
 
 def print_arguments(args, parser):
     """
@@ -67,8 +46,8 @@ def print_arguments(args, parser):
         args: The parsed arguments (from `parser.parse_args()`).
         parser: The `argparse.ArgumentParser` object.
     """
-    print("Arguments used in the script:")
-    print("-" * 50)
+    print("Arguments used in this script:")
+    print("\n" )
     
     # Get the default values from the parser
     defaults = {action.dest: action.default for action in parser._actions if action.dest != "help"}
@@ -88,6 +67,65 @@ def print_arguments(args, parser):
             print(f"{arg_name}: {arg_value}")
 
     print("-" * 50)
+
+
+
+def save_training_metadata(args, best_epoch, score, percentage):
+    """
+    Save all the parameters, hyper-parameters, and codebook usage in a JSON file.
+
+    Args:
+        args: The parsed command-line arguments (from argparse).
+        model: The deep learning model.
+        codebook_usage: A dictionary or list containing codebook usage information (optional).
+    """
+
+
+    # Get the current timestamp for the filename
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M")
+    filename = (args.model_name).replace('.pth', '.json')
+
+        # Parse kwargs arguments into a dictionary
+    kwargs_dict = {}
+    if args.kwargs:
+        for kwarg in args.kwargs:
+            if '=' in kwarg:
+                key, value = kwarg.split('=', 1)
+                kwargs_dict[key] = value
+
+
+    # Prepare the metadata dictionary
+    metadata = {
+        "model_parameters": {
+            "embedding_dim": args.D,
+            "num_embeddings": args.K,
+            "downsampling_factor": args.downsampling_factor,
+            "residual": args.use_residual,
+            "num_quantizers": args.num_quantizers,
+            "shared_codebook": args.shared_codebook,
+            "beta": args.beta,
+            "decay": args.decay,
+            "data_modality": args.data_modality,
+        },
+        "kwargs_arguments": kwargs_dict,  # Store additional kwargs arguments
+        "training_parameters": {
+            "batch_size": args.BATCH_SIZE,
+            "epochs":args.epochs,
+            "loss_function": args.loss_func,
+        },
+        "evaluation": {
+            "best_epoch" : best_epoch, 
+            "score" : score,
+            "codebook_usage" : percentage,
+        },
+        "timestamp": timestamp,
+    }
+
+    # Save the metadata to a JSON file
+    with open(filename, 'w') as f:
+        json.dump(metadata, f, indent=4)
+
+    print(f"( Training metadata saved to {filename} )")
 
 
 def train(): 
@@ -131,8 +169,11 @@ def train():
 
 
 
-
+    ############################################################################
     #################### dataset init ######################
+    ############################################################################
+    
+    
     dataset_path = "/home/ids/ihamdaoui-21/ACDC/database"
 
     train_set_path = os.path.join(dataset_path, "training")
@@ -185,9 +226,9 @@ def train():
 
 
 
-
+    ############################################################################
     ###################### training loop ######################
-
+    ############################################################################
 
     model.train()
 
@@ -243,59 +284,64 @@ def train():
             best_val_loss = val_loss
 
 
-    print("\n\n\n\n")
-    print("Training complete.")
-    print("\n\n\n\n")
+    print("\n\n")
+    print("Training is complete with no errors")
+    print("\n\n")
 
 
 
-
+    ############################################################################
     ################ Evaluae the model #################
+    ############################################################################
+
+
 
     if (args.data_modality == 'SEG'):
         dataset = "Segmentations dataset"
-        score = " The DiceScore "
+        type_score = " % in The DiceScore "
     else : 
         dataset = "MRI images dataset"
-        score = " The MSE score "
+        type_score = " in The MSE score "
 
 
     print("-" * 50)
-    print("\n\n\n\n")
+    print("\n\n")
 
     print("This model is trained on the {}".format(dataset))
 
+    # loading the best model weights : 
+
+    model.load_state_dict(torch.load(args.model_name)['model_state_dict'])
+    model = model.to(device)
+
+    best_epoch = torch.load(args.model_name)['epoch']
 
 
-    print("The model score is : " , score_model(model, TestLoader, device))
-    print("\n\n\n\n")
+    score = score_model(model, TestLoader, device)
+    print("It has scored  : " , score, type_score)
+    print("\n\n.")
     print("-" * 50)
 
 
-
+    ############################################################################
     ################ CodeBook usage ###################
+    ############################################################################
 
-    print("\n\n\n\n")
+    print("\n\n")
 
     print("codebook_investigation : ")
 
 
-    hist = codebook_hist_testset(model, TestLoader, device)
-    hist = hist/np.sum(hist)
+    hist, percentage = codebook_hist_testset(model, TestLoader, device)
     # print(hist)
-    print("\n\n\n\n")
-
-    
-
+    print("\n\n")
+    print("-" * 50)
 
 
-
+    save_training_metadata(args, best_epoch, score, percentage)
 
 
 
-# if __name__ == "__main__":
-#     args = parse_args()
-#     print(args)
 
 
 if __name__ == "__main__":

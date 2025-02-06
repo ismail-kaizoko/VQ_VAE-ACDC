@@ -1,0 +1,27 @@
+{
+    "model_parameters": {
+        "embedding_dim": 64,
+        "num_embeddings": 512,
+        "downsampling_factor": 8,
+        "residual": false,
+        "num_quantizers": 2,
+        "shared_codebook": false,
+        "beta": 0.25,
+        "decay": 0.8,
+        "data_modality": "SEG"
+    },
+    "kwargs_arguments": {
+        "kmeans_init": "True"
+    },
+    "training_parameters": {
+        "batch_size": 16,
+        "epochs": 2,
+        "loss_function": null
+    },
+    "evaluation": {
+        "best_epoch": 1,
+        "score": 0.9156865968423731,
+        "codebook_usage": 5.2734375
+    },
+    "timestamp": "2025-02-06 01:16"
+}

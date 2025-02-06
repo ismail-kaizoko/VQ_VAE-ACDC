@@ -1,0 +1,47 @@
+Arguments used in this script:
+
+
+L: 128 (default)
+data_modality: SEG (user-provided)
+BATCH_SIZE: 16 (default)
+lr: 0.0005 (default)
+epochs: 2 (user-provided)
+model_name: saved_models/seg/random.pth (user-provided)
+loss_func: None (default)
+K: 512 (default)
+D: 64 (default)
+downsampling_factor: 8 (default)
+use_residual: False (default)
+num_quantizers: 2 (default)
+shared_codebook: False (default)
+beta: 0.25 (default)
+decay: 0.8 (default)
+kwargs: ['kmeans_init=True'] (user-provided)
+--------------------------------------------------
+
+
+
+Training is complete with no errors
+
+
+
+--------------------------------------------------
+
+
+
+This model is trained on the Segmentations dataset
+It has scored  :  0.9156865968423731  % in The DiceScore 
+
+
+.
+--------------------------------------------------
+
+
+
+codebook_investigation : 
+ONLY 27 OF CODES WERE USED FROM 512, WHICH MAKE 5.2734375 % OF CODES FROM THE CODE-BOOK
+
+
+
+--------------------------------------------------
+Training metadata saved to saved_models/seg/random.json

@@ -370,8 +370,8 @@ def codebook_hist_testset(model, val_loader, device):
 
         percentage = (model.vq_layer.codebook_size - unused_codes)*100/model.vq_layer.codebook_size
 
-        print(f" ONLY {model.vq_layer.codebook_size - unused_codes} OF CODES WERE USED FROM {model.vq_layer.codebook_size}, WHICH MAKE {percentage} % OF CODES FROM THE CODE-BOOK")
+        print(f"ONLY {model.vq_layer.codebook_size - unused_codes} OF CODES WERE USED FROM {model.vq_layer.codebook_size}, WHICH MAKE {percentage} % OF CODES FROM THE CODE-BOOK")
         
-    return hist
+    return hist, percentage
 
 
