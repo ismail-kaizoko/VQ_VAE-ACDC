@@ -66,7 +66,7 @@ def save_training_metadata(args, best_epoch, score, percentage):
             "shared_codebook": args.shared_codebook,
             "beta": args.beta,
             "decay": args.decay,
-            "data_modality": args.data_modality,
+            "data_mod": args.data_modality,
         },
         "kwargs_arguments": kwargs_dict,  # Store additional kwargs arguments
         "training_parameters": {

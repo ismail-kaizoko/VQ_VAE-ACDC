@@ -30,7 +30,7 @@ Training is complete with no errors
 
 
 This model is trained on the Segmentations dataset
-It has scored  :  0.9156865968423731  % in The DiceScore 
+It has scored  :  0.8659327731413  % in The DiceScore 
 
 
 .
@@ -39,9 +39,8 @@ It has scored  :  0.9156865968423731  % in The DiceScore
 
 
 codebook_investigation : 
-ONLY 27 OF CODES WERE USED FROM 512, WHICH MAKE 5.2734375 % OF CODES FROM THE CODE-BOOK
+ONLY 48 OF CODES WERE USED FROM 512, WHICH MAKE 9.375 % OF CODES FROM THE CODE-BOOK
 
 
 
 --------------------------------------------------
-Training metadata saved to saved_models/seg/random.json
