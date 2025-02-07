@@ -34,6 +34,7 @@ This table contains the performance and parameters of various tests on the vq-va
 || Model 400 from 300 | epochs=50, D= 64 , K= 128 , downsample = 4 , beta = 0.25 | 94 | x | 56.25 |
 || Model 401 from 300 | epochs=50, D= 64 , K= 256 , downsample = 4 , beta = 0.25 | 94 | x | 50.78 |
 || Model 402 from 301 | epochs=50, D= 64 , K= 128 , downsample = 8 , beta = 0.25 | 96.4 | x | 61.7 |
+|| Model 403 from 301 | epochs=50, D= 64 , K= 256 , downsample = 8 , beta = 0.25 | 96.3 | x | 33.2 |
 
 <!-- ### Here are the performances of the RQ-VAE model : (paper : .link)
 
