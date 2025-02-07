@@ -9,10 +9,7 @@
         "beta": 0.25,
         "decay": 0.8,
         "data_mod": "SEG",
-        "L": 128,
-        "batch_size": 16,
-        "epochs": 100,
-        "loss_function": null
+        "loss_func": null
     },
     "kwargs_arguments": {
         "rotation_trick": "True"

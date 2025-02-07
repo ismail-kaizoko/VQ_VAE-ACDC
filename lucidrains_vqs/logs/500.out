@@ -18,3 +18,30 @@ beta: 0.25 (default)
 decay: 0.8 (default)
 kwargs: ['kmeans_init=True'] (user-provided)
 --------------------------------------------------
+
+
+
+Training is complete with no errors
+
+
+
+--------------------------------------------------
+
+
+
+This model is trained on the Segmentations dataset
+It has scored  :  0.9171805285355624  % in The DiceScore 
+
+
+.
+--------------------------------------------------
+
+
+
+codebook_investigation : 
+ONLY 29 OF CODES WERE USED FROM 512, WHICH MAKE 5.6640625 % OF CODES FROM THE CODE-BOOK
+
+
+
+--------------------------------------------------
+( Training metadata saved to saved_models/seg_kwargs/500.json )

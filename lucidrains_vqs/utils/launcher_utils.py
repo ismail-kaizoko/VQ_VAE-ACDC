@@ -71,10 +71,7 @@ def save_training_metadata(args, best_epoch, score, percentage):
             "beta": args.beta,
             "decay": args.decay,
             "data_mod": args.data_mod,
-            "L": args.L,
-            "batch_size": args.batch_size,
-            "epochs":args.epochs,
-            "loss_function": args.loss_func,
+            "loss_func": args.loss_func,
         },
         "kwargs_arguments": kwargs_dict,  # Store additional kwargs arguments
         "evaluation": {

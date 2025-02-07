@@ -18,3 +18,30 @@ beta: 0.25 (default)
 decay: 0.8 (default)
 kwargs: ['orthogonal_reg_active_codes_only=False'] (user-provided)
 --------------------------------------------------
+
+
+
+Training is complete with no errors
+
+
+
+--------------------------------------------------
+
+
+
+This model is trained on the Segmentations dataset
+It has scored  :  0.8459533303976059  % in The DiceScore 
+
+
+.
+--------------------------------------------------
+
+
+
+codebook_investigation : 
+ONLY 22 OF CODES WERE USED FROM 512, WHICH MAKE 4.296875 % OF CODES FROM THE CODE-BOOK
+
+
+
+--------------------------------------------------
+( Training metadata saved to saved_models/seg_kwargs/504.json )

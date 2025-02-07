@@ -9,18 +9,15 @@
         "beta": 0.25,
         "decay": 0.8,
         "data_mod": "SEG",
-        "L": 128,
-        "batch_size": 16,
-        "epochs": 100,
-        "loss_function": null
+        "loss_func": null
     },
     "kwargs_arguments": {
-        "kmeans_iters": "10"
+        "kmeans_init": "True"
     },
     "evaluation": {
-        "best_epoch": 36,
-        "score": 0.9128604504991981,
-        "codebook_usage": 5.078125
+        "best_epoch": 45,
+        "score": 0.9171805285355624,
+        "codebook_usage": 5.6640625
     },
-    "timestamp": "2025-02-07 00:35"
+    "timestamp": "2025-02-07 00:53"
 }

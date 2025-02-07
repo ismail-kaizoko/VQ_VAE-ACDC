@@ -18,3 +18,30 @@ beta: 0.25 (default)
 decay: 0.8 (default)
 kwargs: ['threshold_ema_dead_code=2'] (user-provided)
 --------------------------------------------------
+
+
+
+Training is complete with no errors
+
+
+
+--------------------------------------------------
+
+
+
+This model is trained on the Segmentations dataset
+It has scored  :  0.9474108429516063  % in The DiceScore 
+
+
+.
+--------------------------------------------------
+
+
+
+codebook_investigation : 
+ONLY 34 OF CODES WERE USED FROM 512, WHICH MAKE 6.640625 % OF CODES FROM THE CODE-BOOK
+
+
+
+--------------------------------------------------
+( Training metadata saved to saved_models/seg_kwargs/503.json )

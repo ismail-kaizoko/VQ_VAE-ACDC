@@ -9,9 +9,7 @@
     "beta": 0.25,
     "decay": 0.8,
     "data_mod": "SEG",
-    "L": 128,
-    "batch_size": 16,
-    "loss_function": null
+    "loss_func": null
   },
   "kwargs_arguments": {
     "kmeans_init": "True"
@@ -23,4 +21,3 @@
   },
   "timestamp": "2025-02-06 01:16"
 }
-  
