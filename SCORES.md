@@ -25,7 +25,6 @@ This table contains the performance and parameters of various tests on the vq-va
 
 | Model version | Model Name | Parameters | Dice Score (%) | N° Codes used | Codebook usage (%) |
 | ------------- | ---------- | ---------- | :------------: | :-----------: | :----------------: |
-
 |V3. : EMA updates
 || Model 300 | epochs=100, D= 64 , K= 512 , downsample = 4 , beta = 0.25 | 93.57 | x | 3.51 |
 || Model 301 | epochs=100, D= 64 , K= 512 , downsample = 8 , beta = 0.25 | 94.45 | x | 3.32 |
