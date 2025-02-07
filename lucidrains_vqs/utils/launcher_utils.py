@@ -89,7 +89,7 @@ def save_training_metadata(args, best_epoch, score, percentage):
     print(f"( Training metadata saved to {filename} )")
 
 
-def save_training_metadata_Refit(args, baseline_model_params,  best_epoch, score, percentage):
+def save_training_metadata_Refit(args, model_parameters, best_epoch, score, percentage):
     """
     Save all the parameters, hyper-parameters, and codebook usage in a JSON file.
 
@@ -115,10 +115,8 @@ def save_training_metadata_Refit(args, baseline_model_params,  best_epoch, score
 
     # Prepare the metadata dictionary
     metadata = {
-        "baseline_model_parameters": baseline_model_params,
-        "model_parameters" : {
-            "new_K" : args.new_K,
-        },
+        "baseline_model" : args.baseline_model_name,
+        "model_parameters" : model_parameters,
         "kwargs_arguments": kwargs_dict,  # Store additional kwargs arguments
         "evaluation": {
             "best_epoch" : best_epoch, 
@@ -136,11 +134,9 @@ def save_training_metadata_Refit(args, baseline_model_params,  best_epoch, score
 
 
 
-def load_model_metadata(json_filepath):
-    """
-    Load model parameters from a JSON file and instantiate a new model.
+def load_model_metadata(model_path):
 
-    """
+    json_filepath = model_path.replace('.pth', '.json')
     # Load the JSON file
     with open(json_filepath, 'r') as f:
         metadata = json.load(f)

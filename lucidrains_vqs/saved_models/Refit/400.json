@@ -1,0 +1,22 @@
+{
+    "baseline_model": "saved_models/seg/302.pth",
+    "model_parameters": {
+        "embedding_dim": 64,
+        "num_embeddings": 128,
+        "downsampling_factor": 8,
+        "residual": false,
+        "num_quantizers": 2,
+        "shared_codebook": false,
+        "beta": 0.25,
+        "decay": 0.8,
+        "data_mod": "SEG",
+        "loss_func": null
+    },
+    "kwargs_arguments": {},
+    "evaluation": {
+        "best_epoch": 14,
+        "score": 0.9644877998267903,
+        "codebook_usage": 89.84375
+    },
+    "timestamp": "2025-02-07 21:12"
+}

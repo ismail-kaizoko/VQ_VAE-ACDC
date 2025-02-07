@@ -18,7 +18,7 @@ conda activate torch
 
 # Run the training script with specific arguments
 srun python /home/ids/ihamdaoui-21/vq_vae_project/VQ_VAE-ACDC/lucidrains_vqs/Refit_launcher.py \
-    --new_K 256\
-    --baseline_model_name saved_models/seg/300.pth\
+    --new_K 128\
+    --baseline_model_name saved_models/seg/302.pth\
     --model_name saved_models/Refit/400.pth\
 

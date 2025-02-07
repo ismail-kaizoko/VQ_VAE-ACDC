@@ -23,6 +23,7 @@ This table contains the performance and parameters of various tests on the vq-va
 |                         | Model 201  | base_model = v1.model100, epochs=100, D= 64 , K= 128 , downsample = 4 |     99.67      |      128      |        100         |
 |                         |            |                                                                       |                |               |                    | -->
 
+
 | Model version | Model Name | Parameters | Dice Score (%) | N° Codes used | Codebook usage (%) |
 | ------------- | ---------- | ---------- | :------------: | :-----------: | :----------------: |
 |V3. : EMA updates
@@ -35,6 +36,9 @@ This table contains the performance and parameters of various tests on the vq-va
 || Model 401 from 300 | epochs=50, D= 64 , K= 256 , downsample = 4 , beta = 0.25 | 94 | x | 50.78 |
 || Model 402 from 301 | epochs=50, D= 64 , K= 128 , downsample = 8 , beta = 0.25 | 96.4 | x | 61.7 |
 || Model 403 from 301 | epochs=50, D= 64 , K= 256 , downsample = 8 , beta = 0.25 | 96.3 | x | 33.2 |
+|| Model 404 from 302 | epochs=50, D= 64 , K= 128 , downsample = 8 , beta = 0.25 | 96.44 | x | 89.84 |
+
+
 
 <!-- ### Here are the performances of the RQ-VAE model : (paper : .link)
 

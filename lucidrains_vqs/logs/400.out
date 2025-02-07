@@ -1,6 +1,32 @@
-     THis is a Refit-Finutned version of the model saved_models/seg/300.pth with new K = 256 
+     THis is a Refit-Finutned version of the model saved_models/seg/302.pth with new K= 128 
 --------------------------------------------------
 
 
 
-saved_models/seg/300.pth
+
+
+
+Training is complete with no errors
+
+
+
+--------------------------------------------------
+
+
+
+This model is trained on the Segmentations dataset
+It has scored  :  0.9644877998267903  % in The DiceScore 
+
+
+.
+--------------------------------------------------
+
+
+
+codebook_investigation : 
+ONLY 115 OF CODES WERE USED FROM 128, WHICH MAKE 89.84375 % OF CODES FROM THE CODE-BOOK
+
+
+
+--------------------------------------------------
+( Training metadata saved to saved_models/Refit/400.json )

@@ -53,17 +53,16 @@ def Refit():
 
 
 
-    print(f"     THis is a Refit-Finutned version of the model {args.baseline_model_name} with new K = {args.new_K} ")
-    print("-" * 50)
+    print(f"     THis is a Refit-Finutned version of the model {args.baseline_model_name} with new K= {args.new_K} ")
+    print("-" * 100)
     print("\n\n")
 
     # print_params("not implemented yed TODO")
 
-    ####################### Load pvious model infos ####################
+    ####################### Load previous model infos ####################
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
     baseline_model_path = args.baseline_model_name
-    print(baseline_model_path)
     baseline_model_params = load_model_metadata(baseline_model_path)
     baseline_model = VQVAE(**baseline_model_params).to(device)
 
@@ -90,8 +89,8 @@ def Refit():
     test_set_path  = os.path.join(dataset_path, "testing")
 
 
-    train_dataset = load_dataset(train_set_path, modality= args.data_mod)
-    test_dataset  = load_dataset(test_set_path, modality= args.data_mod)
+    train_dataset = load_dataset(train_set_path, modality= data_mod)
+    test_dataset  = load_dataset(test_set_path, modality= data_mod)
 
 
     if data_mod == 'SEG':
@@ -146,7 +145,7 @@ def Refit():
     from sklearn.cluster import kmeans_plusplus
 
     # Calculate seeds from k-means++
-    centers_init, indices = kmeans_plusplus(latent_vectors, n_clusters= new_K)
+    centers_init, indices = kmeans_plusplus(latent_vectors, n_clusters= args.new_K)
 
     new_codebook = torch.from_numpy(centers_init)
 
@@ -175,7 +174,8 @@ def Refit():
 
     #model ready to train !!
 
-
+    optimizer = optim.AdamW(model.parameters(), lr= args.lr, weight_decay=1e-4)
+    
     ############################################################################
     ###################### training loop ######################
     ############################################################################
@@ -287,7 +287,7 @@ def Refit():
     print("-" * 50)
 
 
-    save_training_metadata_Refit(args, baseline_model_params, best_epoch, score, percentage)
+    save_training_metadata_Refit(args, model_params, best_epoch, score, percentage)
 
 
 
