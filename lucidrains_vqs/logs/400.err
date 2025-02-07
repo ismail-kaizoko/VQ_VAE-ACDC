@@ -1,0 +1,13 @@
+Traceback (most recent call last):
+  File "/home/ids/ihamdaoui-21/vq_vae_project/VQ_VAE-ACDC/lucidrains_vqs/Refit_launcher.py", line 295, in <module>
+    Refit()
+  File "/home/ids/ihamdaoui-21/vq_vae_project/VQ_VAE-ACDC/lucidrains_vqs/Refit_launcher.py", line 67, in Refit
+    baseline_model_params = load_model_metadata(baseline_model_path)
+  File "/home/ids/ihamdaoui-21/vq_vae_project/VQ_VAE-ACDC/lucidrains_vqs/utils/launcher_utils.py", line 146, in load_model_metadata
+    metadata = json.load(f)
+  File "/home/ids/ihamdaoui-21/anaconda3/envs/torch/lib/python3.9/json/__init__.py", line 293, in load
+    return loads(fp.read(),
+  File "/home/ids/ihamdaoui-21/anaconda3/envs/torch/lib/python3.9/codecs.py", line 322, in decode
+    (result, consumed) = self._buffer_decode(data, self.errors, final)
+UnicodeDecodeError: 'utf-8' codec can't decode byte 0x80 in position 64: invalid start byte
+srun: error: node16: task 0: Exited with exit code 1

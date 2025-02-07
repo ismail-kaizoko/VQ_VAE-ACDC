@@ -24,11 +24,19 @@ This table contains the performance and parameters of various tests on the vq-va
 |                         |            |                                                                       |                |               |                    |
 
 |V3. : EMA updates
-|| Model 300 | epochs=100, D= 64 , K= 512 , downsample = 4 , beta = 0.25 | 96.68 | 512 | 100 |
+|| Model 300 | epochs=100, D= 64 , K= 512 , downsample = 4 , beta = 0.25 | 93.57 | x | 3.51 |
+|| Model 301 | epochs=100, D= 64 , K= 512 , downsample = 8 , beta = 0.25 | 94.45 | x | 3.32 |
+|| Model 302 | epochs=100, D= 64 , K= 256 , downsample = 8 , beta = 0.25 | 95.21 | x | 12.89 |
+|| Model 303 | epochs=100, D= 64 , K= 128 , downsample = 8 , beta = 0.25 | 91.46 | x | 21.875 |
 
-### Here are the performances of the RQ-VAE model : (paper : .link)
+|V4. : Refit
+|| Model 400 from 300 | epochs=100, D= 64 , K= 128 , downsample = 4 , beta = 0.25 | 94 | x | 56.25 |
+|| Model 401 from 300 | epochs=100, D= 64 , K= 256 , downsample = 4 , beta = 0.25 | 94 | x | 50.78 |
+|| Model 402 from 301 | epochs=100, D= 64 , K= 128 , downsample = 8 , beta = 0.25 | 96.4 | x | 61.7 |
+
+<!-- ### Here are the performances of the RQ-VAE model : (paper : .link)
 
 | Model Name | Parameters                                                                       | Dice Score (%) |
 | ---------- | -------------------------------------------------------------------------------- | :------------: |
 | Model 400  | D= 64 , K= 512 , downsample =8 ,num_cb = 2, shared_cb = false,kmeans_init = true |     97.10      |
-| Model 401  | D= 64 , K= 128 , downsample =8 ,num_cb = 2, shared_cb = false,kmeans_init = true |     94.94      |
+| Model 401  | D= 64 , K= 128 , downsample =8 ,num_cb = 2, shared_cb = false,kmeans_init = true |     94.94      | -->

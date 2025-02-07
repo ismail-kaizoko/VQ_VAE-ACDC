@@ -87,3 +87,65 @@ def save_training_metadata(args, best_epoch, score, percentage):
         json.dump(metadata, f, indent=4)
 
     print(f"( Training metadata saved to {filename} )")
+
+
+def save_training_metadata_Refit(args, baseline_model_params,  best_epoch, score, percentage):
+    """
+    Save all the parameters, hyper-parameters, and codebook usage in a JSON file.
+
+    Args:
+        args: The parsed command-line arguments (from argparse).
+        model: The deep learning model.
+        codebook_usage: A dictionary or list containing codebook usage information (optional).
+    """
+
+
+    # Get the current timestamp for the filename
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M")
+    filename = (args.model_name).replace('.pth', '.json')
+
+        # Parse kwargs arguments into a dictionary
+    kwargs_dict = {}
+    if args.kwargs:
+        for kwarg in args.kwargs:
+            if '=' in kwarg:
+                key, value = kwarg.split('=', 1)
+                kwargs_dict[key] = value
+
+
+    # Prepare the metadata dictionary
+    metadata = {
+        "baseline_model_parameters": baseline_model_params,
+        "model_parameters" : {
+            "new_K" : args.new_K,
+        },
+        "kwargs_arguments": kwargs_dict,  # Store additional kwargs arguments
+        "evaluation": {
+            "best_epoch" : best_epoch, 
+            "score" : score,
+            "codebook_usage" : percentage,
+        },
+        "timestamp": timestamp,
+    }
+
+    # Save the metadata to a JSON file
+    with open(filename, 'w') as f:
+        json.dump(metadata, f, indent=4)
+
+    print(f"( Training metadata saved to {filename} )")
+
+
+
+def load_model_metadata(json_filepath):
+    """
+    Load model parameters from a JSON file and instantiate a new model.
+
+    """
+    # Load the JSON file
+    with open(json_filepath, 'r') as f:
+        metadata = json.load(f)
+
+    # Extract model parameters from the metadata
+    model_params = metadata.get("model_parameters", {})
+
+    return model_params

@@ -1,0 +1,24 @@
+#!/usr/bin/bash
+#SBATCH --job-name=400
+#SBATCH --gres=gpu  # Request 1 GPU
+#SBATCH --partition=P100            # Use the GPU partition
+#SBATCH --time=01:00:00            # Time limit
+#SBATCH --output=logs/%x.out    # Stdout logs
+#SBATCH --error=logs/%x.err     # Stderr logs
+
+
+
+# source /home/ids/ihamdaoui-21/anaconda3/etc/profile.d/conda.h
+# conda activate torch
+
+# module load conda
+source /home/ids/ihamdaoui-21/anaconda3/etc/profile.d/conda.sh
+conda activate torch
+
+
+# Run the training script with specific arguments
+srun python /home/ids/ihamdaoui-21/vq_vae_project/VQ_VAE-ACDC/lucidrains_vqs/Refit_launcher.py \
+    --new_K 256\
+    --baseline_model_name saved_models/seg/300.pth\
+    --model_name saved_models/Refit/400.pth\
+
