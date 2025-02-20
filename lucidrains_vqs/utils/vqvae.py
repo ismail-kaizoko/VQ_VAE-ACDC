@@ -178,8 +178,8 @@ class VQVAE(nn.Module):
                                             commitment_weight = self.beta,
                                             decay = self.decay,
                                             accept_image_fmap = True,
-                                            kmeans_init = self.kmeans_init,
-                                            kmeans_iters = self.kmeans_iters,
+                                            # kmeans_init = self.kmeans_init,
+                                            # kmeans_iters = self.kmeans_iters,
                                             **kwargs )
 
 
